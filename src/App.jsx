@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 
 const C = {
   bg: "#FAF8F4", bgAlt: "#F2EFE8", bgCard: "#FFFFFF",
-  ink: "#1A1A2E", inkSoft: "#5C5C6F", inkMuted: "#9C9CAF",
+  ink: "#0D0D0D", inkSoft: "#3A3A3A", inkMuted: "#767676",
   accent: "#C8102E", accentSoft: "#C8102E15",
   gold: "#B8860B", goldSoft: "#B8860B12",
   indigo: "#2D3561", indigoSoft: "#2D356110",
@@ -165,10 +165,10 @@ export default function App() {
           <div className="hf fu" style={{ maxWidth: 1160, margin: "0 auto", display: "flex", alignItems: "center", gap: 50 }}>
             <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
               <span className="tag" style={{ background: C.accentSoft, color: C.accent, marginBottom: 18 }}>🎓 Nowa era korepetycji</span>
-              <h1 className="ht" style={{ fontSize: 54, fontWeight: 900, lineHeight: 1.08, letterSpacing: -2, marginBottom: 18 }}>
+              <h1 className="ht" style={{ fontSize: 54, fontWeight: 900, lineHeight: 1.08, letterSpacing: -2, marginBottom: 18, position: "relative" }}>
                 Znajdź swojego<br />
-                <span className="jp" style={{ color: C.accent, fontWeight: 900, fontSize: "1.1em" }}>先生</span>
-                <span style={{ color: C.inkSoft, fontWeight: 400, fontSize: ".5em", marginLeft: 8 }}>sensei</span><br />
+                <span style={{ color: C.accent }}>nauczyciela</span>
+                <span className="jp" style={{ color: C.accent, fontWeight: 900, fontSize: ".28em", opacity: 0.22, marginLeft: 10, verticalAlign: "middle" }}>先生</span><br />
                 <span style={{ color: C.inkSoft, fontWeight: 500, fontSize: ".62em" }}>i ucz się minuta po minucie</span>
               </h1>
               <p style={{ fontSize: 17, color: C.inkSoft, lineHeight: 1.75, maxWidth: 450, marginBottom: 30 }}>
@@ -187,7 +187,7 @@ export default function App() {
             <div className="fu2 hm" style={{ flex: "0 0 370px" }}>
               <div className="card" style={{ padding: 32, borderRadius: 20 }}>
                 <div style={{ textAlign: "center", marginBottom: 6 }}>
-                  <span className="jp" style={{ fontSize: 26, color: C.accent }}>時</span>
+                  <span className="jp" style={{ fontSize: 16, color: C.accent, opacity: 0.25 }}>時</span>
                   <div style={{ fontSize: 11, color: C.inkMuted, fontWeight: 500, letterSpacing: 1.5, marginTop: 4, textTransform: "uppercase" }}>Symulacja kosztu lekcji</div>
                 </div>
                 <div style={{ margin: "20px 0" }}><Timer /></div>
@@ -208,13 +208,12 @@ export default function App() {
         <section className="sec">
           <div style={{ textAlign: "center", marginBottom: 48 }}>
             <span className="tag" style={{ background: C.indigoSoft, color: C.indigo }}>Jak to działa</span>
-            <h2 style={{ fontSize: 36, fontWeight: 800, marginTop: 12, letterSpacing: -1 }}>Prosto jak <span style={{ color: C.accent }}>一二三</span></h2>
+            <h2 style={{ fontSize: 36, fontWeight: 800, marginTop: 12, letterSpacing: -1 }}>Prosto i <span style={{ color: C.accent }}>szybko</span><span className="jp" style={{ fontSize: 14, color: C.accent, opacity: 0.2, marginLeft: 10, fontWeight: 400 }}>一二三</span></h2>
           </div>
           <div className="g4" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 18 }}>
             {[["一","🔍","Wybierz przedmiot","Porównaj profile, oceny i stawki"],["二","📅","Zarezerwuj lekcję","Wybierz termin lub połącz się teraz"],["三","🎥","Ucz się online","Wideo, tablica, czat w przeglądarce"],["四","⏱️","Zapłać za minuty","Tylko za realny czas nauki"]].map(([jp,ic,t,d],i) => (
               <div key={i} className="card" style={{ padding: 26, textAlign: "center", cursor: "pointer" }} onClick={() => nav("how")}>
-                <div className="jp" style={{ fontSize: 28, color: C.accent, marginBottom: 10, opacity: .6 }}>{jp}</div>
-                <div style={{ fontSize: 28, marginBottom: 8 }}>{ic}</div>
+                <div style={{ fontSize: 28, marginBottom: 8, position: "relative" }}>{ic}<span className="jp" style={{ position: "absolute", bottom: -4, right: "calc(50% - 28px)", fontSize: 10, color: C.accent, opacity: 0.2 }}>{jp}</span></div>
                 <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>{t}</h3>
                 <p style={{ fontSize: 13, color: C.inkMuted, lineHeight: 1.5 }}>{d}</p>
               </div>
@@ -227,7 +226,7 @@ export default function App() {
         {/* TOP TEACHERS */}
         <section className="sec">
           <div style={{ textAlign: "center", marginBottom: 42 }}>
-            <span className="tag" style={{ background: C.goldSoft, color: C.gold }}>先生 Sensei</span>
+            <span className="tag" style={{ background: C.goldSoft, color: C.gold }}>Sensei</span>
             <h2 style={{ fontSize: 36, fontWeight: 800, marginTop: 12, letterSpacing: -1 }}>Najlepsi <span style={{ color: C.accent }}>nauczyciele</span></h2>
           </div>
           <div className="g3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18 }}>
@@ -275,12 +274,12 @@ export default function App() {
         <section className="sec fu">
           <div style={{ textAlign: "center", marginBottom: 50 }}>
             <span className="tag" style={{ background: C.indigoSoft, color: C.indigo }}>Jak to działa</span>
-            <h1 style={{ fontSize: 40, fontWeight: 900, marginTop: 12, letterSpacing: -1.5 }}>Droga ucznia <span className="jp" style={{ color: C.accent }}>道</span></h1>
+            <h1 style={{ fontSize: 40, fontWeight: 900, marginTop: 12, letterSpacing: -1.5 }}>Jak to <span style={{ color: C.accent }}>działa</span><span className="jp" style={{ fontSize: 16, color: C.accent, opacity: 0.2, marginLeft: 10, fontWeight: 400 }}>道</span></h1>
           </div>
           <div style={{ maxWidth: 660, margin: "0 auto" }}>
             {[["一","🔍","Wybierz przedmiot i nauczyciela","Przeglądaj profile, doświadczenie, oceny i stawki. Każdy nauczyciel ma zweryfikowany profil i opinie."],["二","📅","Zarezerwuj lub połącz się teraz","Zaplanuj lekcję lub użyj 'Połącz teraz' — system znajdzie nauczyciela w 30 sekund."],["三","🎥","Ucz się w przeglądarce","Wideo HD, interaktywna tablica, czat, udostępnianie ekranu. Nic nie instalujesz."],["四","⏱️","Zapłać za minuty","Licznik startuje z lekcją i kończy gdy ją zakończysz. Środki pobierane po sesji."],["五","⭐","Oceń i wróć","Oceń nauczyciela, zostaw opinię. Twoja historia, notatki i postępy zapisane w panelu."]].map(([jp,ic,t,d],i) => (
               <div key={i} style={{ display: "flex", gap: 20, marginBottom: 28, alignItems: "flex-start" }}>
-                <div style={{ flex: "0 0 52px", height: 52, borderRadius: 14, background: i === 0 ? C.accent : C.bgAlt, color: i === 0 ? "#fff" : C.accent, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, fontFamily: "'Noto Serif JP',serif", fontWeight: 700, border: `1.5px solid ${i === 0 ? C.accent : C.border}` }}>{jp}</div>
+                <div style={{ flex: "0 0 52px", height: 52, borderRadius: 14, background: i === 0 ? C.accent : C.bgAlt, color: i === 0 ? "#fff" : C.accent, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 800, border: `1.5px solid ${i === 0 ? C.accent : C.border}`, position: "relative", flexDirection: "column", gap: 0 }}>{i + 1}<span className="jp" style={{ fontSize: 8, opacity: 0.35, fontWeight: 400, lineHeight: 1 }}>{jp}</span></div>
                 <div><div style={{ fontSize: 22, marginBottom: 4 }}>{ic}</div><h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 4 }}>{t}</h3><p style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.7 }}>{d}</p></div>
               </div>
             ))}
@@ -294,7 +293,7 @@ export default function App() {
         <section className="sec fu">
           <div style={{ textAlign: "center", marginBottom: 42 }}>
             <span className="tag" style={{ background: C.goldSoft, color: C.gold }}>Przedmioty</span>
-            <h1 style={{ fontSize: 40, fontWeight: 900, marginTop: 12, letterSpacing: -1.5 }}>Znajdź swojego <span className="jp" style={{ color: C.accent }}>先生</span></h1>
+            <h1 style={{ fontSize: 40, fontWeight: 900, marginTop: 12, letterSpacing: -1.5 }}>Znajdź swojego <span style={{ color: C.accent }}>nauczyciela</span></h1>
           </div>
           <div className="g2" style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 16 }}>
             {SUBJECTS.map((s, i) => (
@@ -314,7 +313,7 @@ export default function App() {
       {page === "teachers" && (
         <section className="sec fu">
           <div style={{ textAlign: "center", marginBottom: 32 }}>
-            <span className="tag" style={{ background: C.goldSoft, color: C.gold }}>先生</span>
+            <span className="tag" style={{ background: C.goldSoft, color: C.gold }}>Nauczyciele</span>
             <h1 style={{ fontSize: 40, fontWeight: 900, marginTop: 12, letterSpacing: -1.5 }}>Nasi <span style={{ color: C.accent }}>nauczyciele</span></h1>
           </div>
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
@@ -372,7 +371,7 @@ export default function App() {
         <section className="sec fu">
           <div style={{ textAlign: "center", marginBottom: 50 }}>
             <span className="tag" style={{ background: C.goldSoft, color: C.gold }}>Dla nauczycieli</span>
-            <h1 style={{ fontSize: 40, fontWeight: 900, marginTop: 12, letterSpacing: -1.5 }}>Zostań <span className="jp" style={{ color: C.accent }}>先生</span> na senseionline</h1>
+            <h1 style={{ fontSize: 40, fontWeight: 900, marginTop: 12, letterSpacing: -1.5 }}>Zostań <span style={{ color: C.accent }}>nauczycielem</span> na senseionline</h1>
           </div>
           <div className="g2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, alignItems: "start" }}>
             <div>
@@ -407,7 +406,7 @@ export default function App() {
           <section className="sec fu" style={{ display: "flex", justifyContent: "center", minHeight: "65vh", alignItems: "center" }}>
             <div className="card" style={{ padding: 40, width: "100%", maxWidth: 420, borderRadius: 22 }}>
               <div style={{ textAlign: "center", marginBottom: 24 }}>
-                <span className="jp" style={{ fontSize: 34, color: C.accent }}>門</span>
+                <span className="jp" style={{ fontSize: 20, color: C.accent, opacity: 0.2 }}>門</span>
                 <h2 style={{ fontSize: 24, fontWeight: 800, marginTop: 6 }}>{page === "login" ? "Witaj ponownie" : "Dołącz do Sensei"}</h2>
                 <p style={{ fontSize: 13, color: C.inkMuted, marginTop: 4 }}>{page === "login" ? "Zaloguj się na konto" : "Stwórz konto za darmo"}</p>
               </div>
