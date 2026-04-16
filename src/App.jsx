@@ -119,10 +119,16 @@ export default function App() {
   ];
 
   return (
-    <div style={{ fontFamily: "'Outfit',sans-serif", background: C.bg, color: C.ink, minHeight: "100vh", display: "flex", overflow: "hidden" }}>
+    <div style={{ fontFamily: "'Outfit',sans-serif", background: C.bg, color: C.ink, minHeight: "100vh" }}>
       <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&family=Noto+Serif+JP:wght@400;700;900&display=swap" rel="stylesheet" />
       <style>{`
-        html, body { overflow-x: hidden; width: 100%; margin: 0; padding: 0; }
+       html, body, #root { 
+          margin: 0; 
+          padding: 0; 
+          overflow-x: hidden; 
+          width: 100%; 
+          background-color: ${C.bg}; 
+        }
         *{margin:0;padding:0;box-sizing:border-box}
         ::selection{background:${C.accentSoft};color:${C.accent}}
         @keyframes fu{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
@@ -263,7 +269,7 @@ export default function App() {
       )}
 
       {/* ══════════ MAIN CONTENT ══════════ */}
-      <main className="main-content" style={{ marginLeft: 240, flex: 1, minHeight: "100vh", minWidth: 0, overflow: "hidden" }}>
+      <main className="main-content" style={{ marginLeft: 240, minHeight: "100vh" }}>
         <div style={{ paddingTop: 0 }}>
 
           {/* ─── HOME ─── */}
