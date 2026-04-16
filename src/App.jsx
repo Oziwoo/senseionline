@@ -888,20 +888,31 @@ const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
   <section className="fu" style={{ padding: "48px 40px", maxWidth: 800, margin: "0 auto" }}>
     <SectionTitle tag="Jak to działa" tagColor={C.teal} tagBg={C.tealSoft} title="Droga ucznia" accent="道" />
     <div style={{ maxWidth: 640, margin: "0 auto" }}>
-              {[["🪙","Kup pakiet SenseiCoinów","1 coin = 1 minuta. Im większy pakiet, tym niższy koszt za minutę. Płatność przez Stripe, BLIK, Przelewy24."],["🔍","Wybierz Senseia","Przeglądaj profile, oceny, stawki. Każdy Sensei zweryfikowany."],["📅","Połącz się natychmiast","'Połącz teraz' — znajdziemy wolnego Senseia w 30 sekund."],["🎥","Ucz się w przeglądarce","Wideo HD, tablica, czat. Nic nie instalujesz. Minuty = coiny."],["⭐","Oceń i wróć","Historia, wydane coiny, postępy — wszystko w portfelu."]].map(([ic,t,d],i) => (
-                <div key={i} style={{ display: "flex", gap: 18, marginBottom: 28 }}>
-                  <div style={{ 
-  flex: "0 0 52px", height: 52, borderRadius: 14, 
-  background: C.bgCard,
-  display: "flex", alignItems: "center", justifyContent: "center", 
-  fontSize: 26, 
-  border: `1.5px solid ${C.border}`,
- boxShadow: "0 2px 8px rgba(27,27,47,.06)",
-  flexShrink: 0
-}}>{ic}</div>
-                  <div><h3 style={{ fontSize: 17, fontWeight: 700, color: C.ink, marginBottom: 4 }}>{t}</h3><p style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.7 }}>{d}</p></div>
-                </div>
-              ))}
+             {[
+  ["先","Kup pakiet SenseiCoinów","Wybierz pakiet od 15 do 90 coinów. 1 SenseiCoin = 1 minuta nauki. Im większy pakiet, tym niższa cena za minutę. Płatność przez Stripe, BLIK lub Przelewy24 — szybko i bezpiecznie."],
+  ["🔍","Wybierz Senseia","Przeglądaj profile nauczycieli — ich doświadczenie, oceny, liczbę sesji i stawkę w coinach. Filtruj po przedmiocie. Każdy Sensei jest zweryfikowany przez nasz zespół."],
+  ["⚡","Połącz się w 30 sekund","Użyj przycisku 'Połącz teraz' — system automatycznie znajdzie dostępnego Senseia i połączy Cię z nim w czasie krótszym niż 30 sekund. Żadnego planowania z wyprzedzeniem."],
+  ["🎥","Ucz się w przeglądarce","Wideo HD, interaktywna tablica, czat i udostępnianie plików — wszystko wbudowane. Nic nie instalujesz. Minuty lekcji automatycznie odliczają SenseiCoiny z Twojego portfela."],
+  ["⭐","Oceń i wróć","Po każdej lekcji oceń Senseia gwiazdkami. Twoja historia sesji, wydane coiny i postępy w nauce — wszystko zapisane w Portfelu studenta. Buduj relację z ulubionym nauczycielem."],
+].map(([ic,t,d],i) => (
+  <div key={i} style={{ display: "flex", gap: 20, marginBottom: 32, alignItems: "flex-start" }}>
+    <div style={{
+      flex: "0 0 56px", height: 56, borderRadius: 16,
+      background: i === 0 ? C.coinBg : i === 2 ? C.accentSoft : C.bgAlt,
+      border: `1.5px solid ${i === 0 ? C.coinGold+"40" : i === 2 ? C.accent+"25" : C.border}`,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      fontSize: 26, flexShrink: 0,
+      boxShadow: "0 2px 8px rgba(27,27,47,.06)"
+    }}>{ic}</div>
+    <div>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+        <h3 style={{ fontSize: 17, fontWeight: 700, color: C.ink }}>{t}</h3>
+        <span style={{ fontSize: 10, fontWeight: 600, color: C.inkMuted, background: C.bgAlt, border: `1px solid ${C.border}`, padding: "2px 8px", borderRadius: 20, letterSpacing: .5 }}>Krok {i+1}</span>
+      </div>
+      <p style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.75 }}>{d}</p>
+    </div>
+  </div>
+))}
             </div>
             <button className="bm" onClick={() => nav("senseis")}>Znajdź Senseia →</button>
           </section>
