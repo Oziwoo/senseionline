@@ -420,10 +420,6 @@ export default function App() {
           )}
 
           {/* ─── TEACHERS ─── */}
-          const generateMeetLink = () => {
-  const rand = (n) => Array.from({length: n}, () => 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)]).join('');
-  return `https://meet.google.com/${rand(3)}-${rand(4)}-${rand(3)}`;
-};
           {page === "teachers" && (
             <section className="fu" style={{ padding: "48px 40px", maxWidth: 1000, margin: "0 auto" }}>
               <SectionTitle tag="先生 Sensei" tagColor={C.gold} tagBg={C.goldSoft} title="Nasi" accent="nauczyciele" />
@@ -710,6 +706,10 @@ export default function App() {
 
 // ═══════════════════════════════════════════════════════
 // TEACHER CARD
+const generateMeetLink = () => {
+  const rand = (n) => Array.from({length: n}, () => 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)]).join('');
+  return `https://meet.google.com/${rand(3)}-${rand(4)}-${rand(3)}`;
+};
 // ═══════════════════════════════════════════════════════
 function TCard({ t, nav }) {
   return (
