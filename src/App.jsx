@@ -245,7 +245,7 @@ export default function App() {
       )}
 
       {/* ══════════ MAIN CONTENT ══════════ */}
-      <main className="main-content" style={{ marginLeft: 240, flex: 1, minHeight: "100vh" }}>
+      <main className="main-content" style={{ marginLeft: 240, flex: 1, minHeight: "100vh", width: "calc(100% - 240px)", maxWidth: "100%" }}>
         <div style={{ paddingTop: 0 }}>
 
           {/* ─── HOME ─── */}
