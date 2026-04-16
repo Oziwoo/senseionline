@@ -885,12 +885,20 @@ const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
 
         {/* ─── HOW IT WORKS ─── */}
         {page === "how" && (
-          <section className="fu" style={{ padding: "48px 40px", maxWidth: 800, margin: "0 auto" }}>
+          <div style={{ maxWidth: 640, margin: "0 auto" }}>
             <SectionTitle tag="Jak to działa" tagColor={C.teal} tagBg={C.tealSoft} title="Droga ucznia" accent="道" />
             <div style={{ maxWidth: 640 }}>
               {[["🪙","Kup pakiet SenseiCoinów","1 coin = 1 minuta. Im większy pakiet, tym niższy koszt za minutę. Płatność przez Stripe, BLIK, Przelewy24."],["🔍","Wybierz Senseia","Przeglądaj profile, oceny, stawki. Każdy Sensei zweryfikowany."],["📅","Połącz się natychmiast","'Połącz teraz' — znajdziemy wolnego Senseia w 30 sekund."],["🎥","Ucz się w przeglądarce","Wideo HD, tablica, czat. Nic nie instalujesz. Minuty = coiny."],["⭐","Oceń i wróć","Historia, wydane coiny, postępy — wszystko w portfelu."]].map(([ic,t,d],i) => (
                 <div key={i} style={{ display: "flex", gap: 18, marginBottom: 28 }}>
-                  <div style={{ flex: "0 0 48px", height: 48, borderRadius: 12, background: i === 0 ? C.accent : C.bgAlt, color: i === 0 ? "#fff" : C.ink, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, border: `1.5px solid ${i === 0 ? C.accent : C.border}` }}>{ic}</div>
+                  <div style={{ 
+  flex: "0 0 52px", height: 52, borderRadius: 14, 
+  background: C.bgCard,
+  display: "flex", alignItems: "center", justifyContent: "center", 
+  fontSize: 26, 
+  border: `1.5px solid ${C.border}`,
+  boxShadow: "0 2px 8px rgba(27,27,47,.06)",
+  flexShrink: 0
+}}>{ic}</div>
                   <div><h3 style={{ fontSize: 17, fontWeight: 700, color: C.ink, marginBottom: 4 }}>{t}</h3><p style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.7 }}>{d}</p></div>
                 </div>
               ))}
