@@ -94,6 +94,7 @@ export default function App() {
   const [sq, setSq] = useState("");
   const [sf, setSf] = useState(null);
   const [studentCoins, setStudentCoins] = useState(42);
+  const [userRole, setUserRole] = useState("student"); // Роль: "student" или "teacher"
   const nav = p => { setPage(p); setSidebarOpen(false); };
   const ft = TEACHERS.filter(t => (!sf || t.subject === sf) && (!sq || (t.name + t.subject).toLowerCase().includes(sq.toLowerCase())));
 
@@ -103,18 +104,25 @@ export default function App() {
     { icon: "⚡", label: "Jak to działa", p: "how" },
     { icon: "📚", label: "Przedmioty", p: "subjects" },
     { icon: "👨‍🏫", label: "Nauczyciele", p: "teachers" },
-    { icon: "先", label: "Pakiety SenseiCoin", p: "pricing", isJp: true },
+    // Показываем покупку коинов только студенту
+    ...(userRole === "student" ? [{ icon: "先", label: "Pakiety SenseiCoin", p: "pricing", isJp: true }] : []),
     { section: "Analiza" },
     { icon: "📊", label: "Matryca konkurentów", p: "competitors" },
     { section: "Konto" },
-    { icon: "🎒", label: "Portfel studenta", p: "dashboard" },
-    { icon: "🎓", label: "Dla nauczycieli", p: "for-teachers" },
+    // Меняем дашборд в зависимости от роли
+    ...(userRole === "student" ? [
+      { icon: "🎒", label: "Portfel studenta", p: "dashboard" },
+      { icon: "🎓", label: "Dla nauczycieli", p: "for-teachers" },
+    ] : [
+      { icon: "👨‍🏫", label: "Panel Nauczyciela", p: "teacher-dashboard" }
+    ])
   ];
 
   return (
     <div style={{ fontFamily: "'Outfit',sans-serif", background: C.bg, color: C.ink, minHeight: "100vh", display: "flex", overflow: "hidden" }}>
       <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&family=Noto+Serif+JP:wght@400;700;900&display=swap" rel="stylesheet" />
       <style>{`
+        html, body { overflow-x: hidden; width: 100%; margin: 0; padding: 0; }
         *{margin:0;padding:0;box-sizing:border-box}
         ::selection{background:${C.accentSoft};color:${C.accent}}
         @keyframes fu{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
@@ -159,15 +167,25 @@ export default function App() {
           </div>
         </div>
 
-        {/* Coin balance */}
-        <div style={{ padding: "14px 20px", background: "#22223A", margin: "12px 12px 4px", borderRadius: 10, cursor: "pointer" }} onClick={() => nav("dashboard")}>
-          <div style={{ fontSize: 10, color: "#888", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4 }}>Twoje SenseiCoiny</div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ fontSize: 22, fontWeight: 800, color: C.coinGold, fontFamily: "'DM Mono',monospace" }}>{studentCoins}</span>
-            <span className="jp" style={{ fontSize: 14, color: C.coinGold }}>先</span>
-            <span style={{ fontSize: 11, color: "#777", marginLeft: "auto" }}>= {studentCoins} min</span>
+        {/* Widget: Balance / Earnings */}
+        {userRole === "student" ? (
+          <div style={{ padding: "14px 20px", background: "#22223A", margin: "12px 12px 4px", borderRadius: 10, cursor: "pointer" }} onClick={() => nav("dashboard")}>
+            <div style={{ fontSize: 10, color: "#888", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4 }}>Twoje SenseiCoiny</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ fontSize: 22, fontWeight: 800, color: C.coinGold, fontFamily: "'DM Mono',monospace" }}>{studentCoins}</span>
+              <span className="jp" style={{ fontSize: 14, color: C.coinGold }}>先</span>
+              <span style={{ fontSize: 11, color: "#777", marginLeft: "auto" }}>= {studentCoins} min</span>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div style={{ padding: "14px 20px", background: "#22223A", margin: "12px 12px 4px", borderRadius: 10, cursor: "pointer" }} onClick={() => nav("teacher-dashboard")}>
+            <div style={{ fontSize: 10, color: "#888", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4 }}>Zarobki (Bieżący miesiąc)</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ fontSize: 22, fontWeight: 800, color: "#16a34a", fontFamily: "'DM Mono',monospace" }}>1 240</span>
+              <span style={{ fontSize: 14, color: "#16a34a" }}>PLN</span>
+            </div>
+          </div>
+        )}
 
         {/* Nav items */}
         <nav style={{ flex: 1, padding: "8px 0" }}>
@@ -611,21 +629,57 @@ export default function App() {
               </div>
 
               {/* Quick actions */}
-              <div className="g3">
+              <div className="g4">
                 {[
                   ["🔍","Znajdź Senseia","teachers"],
                   ["🪙","Kup SenseiCoiny","pricing"],
                   ["📊","Zobacz konkurencję","competitors"],
                 ].map(([ic,label,p],i) => (
-                  <div key={i} className="card" style={{ padding: 20, textAlign: "center", cursor: "pointer" }} onClick={() => nav(p)}>
-                    <div style={{ fontSize: 28, marginBottom: 6 }}>{ic}</div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: C.accent }}>{label} →</div>
-                  </div>
+                 <div className="card" style={{ padding: 20, textAlign: "center", cursor: "pointer", background: C.accentSoft }} onClick={() => { setUserRole("teacher"); nav("teacher-dashboard"); }}>
+                  <div style={{ fontSize: 28, marginBottom: 6 }}>🔄</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: C.accent }}>Pokaż widok Nauczyciela</div>
+                </div>
                 ))}
               </div>
             </section>
           )}
+{/* ─── TEACHER DASHBOARD ─── */}
+          {page === "teacher-dashboard" && (
+            <section className="fu" style={{ padding: "48px 40px", maxWidth: 1000, margin: "0 auto" }}>
+              <SectionTitle tag="👨‍🏫 Panel" tagColor={C.accent} tagBg={C.accentSoft} title="Twój Panel" accent="Nauczyciela" />
+              
+              <div className="g3" style={{ marginBottom: 24 }}>
+                <div className="card" style={{ padding: 20, textAlign: "center" }}>
+                  <div style={{ fontSize: 24, marginBottom: 8 }}>📅</div>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: C.ink }}>3</div>
+                  <div style={{ fontSize: 12, color: C.inkMuted }}>Lekcje dzisiaj</div>
+                </div>
+                <div className="card" style={{ padding: 20, textAlign: "center" }}>
+                  <div style={{ fontSize: 24, marginBottom: 8 }}>⭐</div>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: C.ink }}>4.9</div>
+                  <div style={{ fontSize: 12, color: C.inkMuted }}>Twoja średnia ocena</div>
+                </div>
+                {/* Кнопка возврата в роль студента */}
+                <div className="card" style={{ padding: 20, textAlign: "center", cursor: "pointer", background: C.accentSoft, border: `1px solid ${C.accent}40` }} onClick={() => { setUserRole("student"); nav("dashboard"); }}>
+                  <div style={{ fontSize: 24, marginBottom: 8 }}>🔄</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: C.accent, marginTop: 4 }}>Przełącz na ucznia</div>
+                  <div style={{ fontSize: 11, color: C.inkSoft }}>Test widoku</div>
+                </div>
+              </div>
 
+              <div className="card" style={{ padding: 24 }}>
+                <h3 style={{ fontSize: 17, fontWeight: 700, color: C.ink, marginBottom: 16 }}>Nadchodzące lekcje (Dzisiaj)</h3>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px", borderBottom: `1px solid ${C.borderLight}` }}>
+                  <div><strong style={{marginRight: 10}}>14:00</strong> Matematyka (Kasia M.)</div>
+                  <button className="bm" style={{ padding: "6px 14px", fontSize: 12 }} onClick={() => window.open(generateMeetLink(), '_blank')}>Dołącz do wideo</button>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px" }}>
+                  <div><strong style={{marginRight: 10}}>16:30</strong> Fizyka (Olek T.)</div>
+                  <button className="bo" style={{ padding: "6px 14px", fontSize: 12 }}>Szczegóły</button>
+                </div>
+              </div>
+            </section>
+          )}
           {/* ─── FOR TEACHERS ─── */}
           {page === "for-teachers" && (
             <section className="fu" style={{ padding: "48px 40px", maxWidth: 1000, margin: "0 auto" }}>
