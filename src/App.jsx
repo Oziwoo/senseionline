@@ -365,7 +365,7 @@ function InvestorPage({ nav }) {
         <div className="g3">
           {[
             ["🪙", "SenseiCoin Flywheel", "Wewnętrzna waluta tworzy lock-in. Uczniowie mają 'nieużyte minuty' — wracają. Jak Duolingo Streaks, ale finansowy."],
-            ["👨‍👩‍👧", "Panel Rodzica", "Jedyna platforma z pełną kontrolą rodzicielską. Adresuje główne obiekcje zakupowe: "nie wiem ile wydaje dziecko"."],
+            ["👨‍👩‍👧", "Panel Rodzica", "Jedyna platforma z pełną kontrolą rodzicielską. Adresuje główne obiekcje zakupowe: 'nie wiem ile wydaje dziecko'."],
             ["⚡", "Network Effect", "Więcej nauczycieli = krótszy czas czekania = więcej uczniów = wyższe prowizje = lepsi nauczyciele. Klasyczny marketplace flywheel."],
           ].map(([ic, t, d], i) => (
             <div key={i} style={{ textAlign: "center", padding: "8px 16px" }}>
