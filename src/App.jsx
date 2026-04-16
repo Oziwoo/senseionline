@@ -420,6 +420,10 @@ export default function App() {
           )}
 
           {/* ─── TEACHERS ─── */}
+          const generateMeetLink = () => {
+  const rand = (n) => Array.from({length: n}, () => 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)]).join('');
+  return `https://meet.google.com/${rand(3)}-${rand(4)}-${rand(3)}`;
+};
           {page === "teachers" && (
             <section className="fu" style={{ padding: "48px 40px", maxWidth: 1000, margin: "0 auto" }}>
               <SectionTitle tag="先生 Sensei" tagColor={C.gold} tagBg={C.goldSoft} title="Nasi" accent="nauczyciele" />
@@ -729,7 +733,7 @@ function TCard({ t, nav }) {
             <span style={{ fontSize: 11, color: C.inkMuted }}>/min</span>
           </div>
         </div>
-        <button className="bm" style={{ padding: "8px 18px", fontSize: 12 }}>Umów się</button>
+        <button className="bm" style={{ padding: "8px 18px", fontSize: 12 }} onClick={() => window.open(generateMeetLink(), '_blank')}>Połącz teraz →</button>
       </div>
       <div style={{ textAlign: "center", marginTop: 8, fontSize: 11, color: C.inkMuted }}>{t.sessions.toLocaleString()} sesji</div>
     </div>
