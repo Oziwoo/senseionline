@@ -112,7 +112,7 @@ export default function App() {
   ];
 
   return (
-    <div style={{ fontFamily: "'Outfit',sans-serif", background: C.bg, color: C.ink, minHeight: "100vh", display: "flex" }}>
+    <div style={{ fontFamily: "'Outfit',sans-serif", background: C.bg, color: C.ink, minHeight: "100vh", display: "flex", overflow: "hidden" }}>
       <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&family=Noto+Serif+JP:wght@400;700;900&display=swap" rel="stylesheet" />
       <style>{`
         *{margin:0;padding:0;box-sizing:border-box}
