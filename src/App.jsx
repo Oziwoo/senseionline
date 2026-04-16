@@ -364,7 +364,7 @@ function InvestorPage({ nav }) {
         <h3 style={{ fontSize: 18, fontWeight: 700, color: C.ink, marginBottom: 20 }}>🏆 Dlaczego wygramy — moat</h3>
         <div className="g3">
           {[
-            ["🪙", "SenseiCoin Flywheel", "Wewnętrzna waluta tworzy lock-in. Uczniowie mają "nieużyte minuty" — wracają. Jak Duolingo Streaks, ale finansowy."],
+            ["🪙", "SenseiCoin Flywheel", "Wewnętrzna waluta tworzy lock-in. Uczniowie mają 'nieużyte minuty' — wracają. Jak Duolingo Streaks, ale finansowy."],
             ["👨‍👩‍👧", "Panel Rodzica", "Jedyna platforma z pełną kontrolą rodzicielską. Adresuje główne obiekcje zakupowe: "nie wiem ile wydaje dziecko"."],
             ["⚡", "Network Effect", "Więcej nauczycieli = krótszy czas czekania = więcej uczniów = wyższe prowizje = lepsi nauczyciele. Klasyczny marketplace flywheel."],
           ].map(([ic, t, d], i) => (
