@@ -25,24 +25,24 @@ const PACKAGES = [
   { coins: 90, price: 119, perMin: 1.32, save: 32, label: "Master Pack", icon: "👑", desc: "Maksymalny rabat dla ambitnych." },
 ];
 const SUBJECTS = [
-  { icon: "📐", name: "Matematyka", teachers: 142, coins: "8–18" },
-  { icon: "🧪", name: "Chemia", teachers: 87, coins: "9–20" },
-  { icon: "🔬", name: "Fizyka", teachers: 93, coins: "8–18" },
-  { icon: "🇬🇧", name: "Angielski", teachers: 231, coins: "7–22" },
-  { icon: "🇩🇪", name: "Niemiecki", teachers: 78, coins: "8–17" },
-  { icon: "📖", name: "Polski", teachers: 119, coins: "7–16" },
-  { icon: "🧬", name: "Biologia", teachers: 65, coins: "8–18" },
-  { icon: "💻", name: "Informatyka", teachers: 54, coins: "10–25" },
-  { icon: "🌍", name: "Geografia", teachers: 41, coins: "7–14" },
-  { icon: "📜", name: "Historia", teachers: 58, coins: "7–15" },
+  { icon: "📐", name: "Matematyka", senseis: 142, coins: "8–18" },
+  { icon: "🧪", name: "Chemia", senseis: 87, coins: "9–20" },
+  { icon: "🔬", name: "Fizyka", senseis: 93, coins: "8–18" },
+  { icon: "🇬🇧", name: "Angielski", senseis: 231, coins: "7–22" },
+  { icon: "🇩🇪", name: "Niemiecki", senseis: 78, coins: "8–17" },
+  { icon: "📖", name: "Polski", senseis: 119, coins: "7–16" },
+  { icon: "🧬", name: "Biologia", senseis: 65, coins: "8–18" },
+  { icon: "💻", name: "Informatyka", senseis: 54, coins: "10–25" },
+  { icon: "🌍", name: "Geografia", senseis: 41, coins: "7–14" },
+  { icon: "📜", name: "Historia", senseis: 58, coins: "7–15" },
 ];
-const TEACHERS = [
-  { name: "Anna Kowalska", subject: "Matematyka", rating: 4.9, reviews: 312, coinsPerMin: 1, ini: "AK", exp: "8 lat", badge: "先生", sessions: 2841, bio: "Absolwentka UW, przygotowuje do matury z 95% skutecznością.", online: true },
-  { name: "Piotr Nowak", subject: "Fizyka", rating: 4.8, reviews: 198, coinsPerMin: 1, ini: "PN", exp: "12 lat", badge: "師匠", sessions: 1920, bio: "Doktor nauk fizycznych, trudne koncepty tłumaczy prosto.", online: true },
-  { name: "Marta Wiśniewska", subject: "Angielski", rating: 5.0, reviews: 487, coinsPerMin: 2, ini: "MW", exp: "10 lat", badge: "先生", sessions: 4102, bio: "Cambridge CELTA, 3 lata w Londynie, native-level fluency.", online: false },
+const senseiS = [
+  { name: "Anna Kowalska", subject: "Matematyka", rating: 4.9, reviews: 312, coinsPerMin: 1, ini: "AK", exp: "8 lat", badge: "sensei", sessions: 2841, bio: "Absolwentka UW, przygotowuje do matury z 95% skutecznością.", online: true },
+  { name: "Piotr Nowak", subject: "Fizyka", rating: 4.8, reviews: 198, coinsPerMin: 1, ini: "PN", exp: "12 lat", badge: "master", sessions: 1920, bio: "Doktor nauk fizycznych, trudne koncepty tłumaczy prosto.", online: true },
+  { name: "Marta Wiśniewska", subject: "Angielski", rating: 5.0, reviews: 487, coinsPerMin: 2, ini: "MW", exp: "10 lat", badge: "sensei", sessions: 4102, bio: "Cambridge CELTA, 3 lata w Londynie, native-level fluency.", online: false },
   { name: "Tomasz Zieliński", subject: "Chemia", rating: 4.7, reviews: 156, coinsPerMin: 1, ini: "TZ", exp: "6 lat", badge: null, sessions: 1205, bio: "Pasjonat chemii organicznej, każdą reakcję wyjaśni na przykładach.", online: true },
-  { name: "Karolina Dąbrowska", subject: "Informatyka", rating: 4.9, reviews: 223, coinsPerMin: 2, ini: "KD", exp: "5 lat", badge: "師匠", sessions: 1678, bio: "Full-stack developer, uczy od podstaw po zaawansowane.", online: false },
-  { name: "Michał Lewandowski", subject: "Polski", rating: 4.8, reviews: 189, coinsPerMin: 1, ini: "ML", exp: "15 lat", badge: "先生", sessions: 3540, bio: "Polonista, autor materiałów maturalnych, egzaminator OKE.", online: true },
+  { name: "Karolina Dąbrowska", subject: "Informatyka", rating: 4.9, reviews: 223, coinsPerMin: 2, ini: "KD", exp: "5 lat", badge: "master", sessions: 1678, bio: "Full-stack developer, uczy od podstaw po zaawansowane.", online: false },
+  { name: "Michał Lewandowski", subject: "Polski", rating: 4.8, reviews: 189, coinsPerMin: 1, ini: "ML", exp: "15 lat", badge: "sensei", sessions: 3540, bio: "Polonista, autor materiałów maturalnych, egzaminator OKE.", online: true },
 ];
 const COMPETITORS = [
   { name: "SenseiOnline", model: "SenseiCoin (za minutę)", commission: "20%", minLesson: "1 min", instantConnect: true, parentPanel: true, freeTrial: true, videoBuiltIn: true, pricing: "od 1.32 PLN/min", highlight: true },
@@ -95,7 +95,7 @@ function ToastContainer({ toasts }) {
 }
 
 // ─── Connecting Overlay ───
-function ConnectingOverlay({ teacher, onConnected, onCancel }) {
+function ConnectingOverlay({ sensei, onConnected, onCancel }) {
   const [phase, setPhase] = useState(0); // 0=searching, 1=found, 2=connecting
   const [progress, setProgress] = useState(0);
   useEffect(() => {
@@ -127,7 +127,7 @@ function ConnectingOverlay({ teacher, onConnected, onCancel }) {
             fontSize: phase >= 1 ? 36 : 28, fontWeight: 800, color: phase >= 1 ? C.green : C.accent,
             transition: "all .4s ease",
           }}>
-            {phase >= 1 ? "✓" : teacher.ini}
+            {phase >= 1 ? "✓" : sensei.ini}
           </div>
         </div>
 
@@ -139,12 +139,12 @@ function ConnectingOverlay({ teacher, onConnected, onCancel }) {
 
         {phase === 0 && (
           <div style={{ fontSize: 14, color: "#888", marginBottom: 20 }}>
-            Sprawdzam dostępność <strong style={{ color: "#ccc" }}>{teacher.name}</strong>
+            Sprawdzam dostępność <strong style={{ color: "#ccc" }}>{sensei.name}</strong>
           </div>
         )}
         {phase >= 1 && (
           <div style={{ fontSize: 14, color: "#aaa", marginBottom: 20 }}>
-            <strong style={{ color: "#fff" }}>{teacher.name}</strong> jest gotowy!
+            <strong style={{ color: "#fff" }}>{sensei.name}</strong> jest gotowy!
           </div>
         )}
 
@@ -162,7 +162,7 @@ function ConnectingOverlay({ teacher, onConnected, onCancel }) {
   );
 }
 
-// ─── Teacher Card ───
+// ─── sensei Card ───
 function TCard({ t, onConnect }) {
   return (
     <div className="card" style={{ padding: 22, position: "relative" }}>
@@ -439,11 +439,11 @@ export default function App() {
   const [sf, setSf] = useState(null);
   const [studentCoins, setStudentCoins] = useState(42);
   const [userRole, setUserRole] = useState("student");
-  const [activeTeacher, setActiveTeacher] = useState(null);
+  const [activesensei, setActivesensei] = useState(null);
   const [sessionSeconds, setSessionSeconds] = useState(0);
   const [sessionActive, setSessionActive] = useState(false);
   const [sessionCoinsSpent, setSessionCoinsSpent] = useState(0);
-  const [connectingTeacher, setConnectingTeacher] = useState(null);
+  const [connectingsensei, setConnectingsensei] = useState(null);
   const [sessionRating, setSessionRating] = useState(0);
   const [hoveredStar, setHoveredStar] = useState(0);
   const [toasts, setToasts] = useState([]);
@@ -458,20 +458,20 @@ export default function App() {
     setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 3200);
   }, []);
 
-  const handleConnect = (teacher) => {
+  const handleConnect = (sensei) => {
     if (studentCoins < 1) { nav("pricing"); addToast("Uzupełnij saldo 先 aby rozpocząć lekcję", "info", "⚠️"); return; }
-    setConnectingTeacher(teacher);
+    setConnectingsensei(sensei);
   };
 
   const onConnected = () => {
-    setActiveTeacher(connectingTeacher);
-    setConnectingTeacher(null);
+    setActivesensei(connectingsensei);
+    setConnectingsensei(null);
     setSessionSeconds(0);
     setSessionCoinsSpent(0);
     setSessionRating(0);
     setSessionActive(true);
     nav("session");
-    addToast(`Połączono z ${connectingTeacher?.name}!`, "success", "🎥");
+    addToast(`Połączono z ${connectingsensei?.name}!`, "success", "🎥");
   };
 
   const buyCoins = (pack) => {
@@ -488,16 +488,16 @@ export default function App() {
           if (newS % 6 === 0) {
             setStudentCoins(c => {
               if (c <= 0) { endSession(); return 0; }
-              return c - (activeTeacher?.coinsPerMin || 1);
+              return c - (activesensei?.coinsPerMin || 1);
             });
-            setSessionCoinsSpent(sc => sc + (activeTeacher?.coinsPerMin || 1));
+            setSessionCoinsSpent(sc => sc + (activesensei?.coinsPerMin || 1));
           }
           return newS;
         });
       }, 1000);
     }
     return () => clearInterval(sessionRef.current);
-  }, [sessionActive, page, activeTeacher]);
+  }, [sessionActive, page, activesensei]);
 
   const endSession = () => {
     clearInterval(sessionRef.current);
@@ -513,7 +513,7 @@ export default function App() {
     { icon: "🏠", label: "Strona główna", p: "home" },
     { icon: "⚡", label: "Jak to działa", p: "how" },
     { icon: "📚", label: "Przedmioty", p: "subjects" },
-    { icon: "👨‍🏫", label: "Nauczyciele", p: "teachers" },
+    { icon: "👨‍🏫", label: "Nauczyciele", p: "senseis" },
     ...(userRole === "student" ? [{ icon: "先", label: "Pakiety SenseiCoin", p: "pricing", isJp: true }] : []),
     { section: "Analiza" },
     { icon: "📊", label: "Matryca konkurentów", p: "competitors" },
@@ -522,13 +522,13 @@ export default function App() {
     ...(userRole === "student" ? [
       { icon: "🎒", label: "Portfel studenta", p: "dashboard" },
       { icon: "👨‍👩‍👧", label: "Panel rodzica", p: "parent" },
-      { icon: "🎓", label: "Dla nauczycieli", p: "for-teachers" },
+      { icon: "🎓", label: "Dla nauczycieli", p: "for-senseis" },
     ] : [
-      { icon: "👨‍🏫", label: "Panel Nauczyciela", p: "teacher-dashboard" }
+      { icon: "👨‍🏫", label: "Panel Nauczyciela", p: "sensei-dashboard" }
     ])
   ];
 
-  const ft = TEACHERS.filter(t => (!sf || t.subject === sf) && (!sq || (t.name + t.subject).toLowerCase().includes(sq.toLowerCase())));
+  const ft = senseiS.filter(t => (!sf || t.subject === sf) && (!sq || (t.name + t.subject).toLowerCase().includes(sq.toLowerCase())));
 
   return (
     <div style={{ fontFamily: "'Outfit',sans-serif", background: C.bg, color: C.ink, minHeight: "100vh" }}>
@@ -561,7 +561,7 @@ export default function App() {
       `}</style>
 
       <ToastContainer toasts={toasts} />
-      {connectingTeacher && <ConnectingOverlay teacher={connectingTeacher} onConnected={onConnected} onCancel={() => setConnectingTeacher(null)} />}
+      {connectingsensei && <ConnectingOverlay sensei={connectingsensei} onConnected={onConnected} onCancel={() => setConnectingsensei(null)} />}
 
       {/* ══ SIDEBAR ══ */}
       <aside className="sidebar-d" style={{ position: "fixed", top: 0, left: 0, bottom: 0, width: 240, background: C.sidebar, color: "#fff", zIndex: 100, display: "flex", flexDirection: "column", overflowY: "auto" }}>
@@ -579,7 +579,7 @@ export default function App() {
             </div>
           </div>
         ) : (
-          <div style={{ padding: "14px 20px", background: "#22223A", margin: "12px 12px 4px", borderRadius: 10, cursor: "pointer" }} onClick={() => nav("teacher-dashboard")}>
+          <div style={{ padding: "14px 20px", background: "#22223A", margin: "12px 12px 4px", borderRadius: 10, cursor: "pointer" }} onClick={() => nav("sensei-dashboard")}>
             <div style={{ fontSize: 10, color: "#888", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4 }}>Zarobki (kwiecień)</div>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <span style={{ fontSize: 22, fontWeight: 800, color: C.green, fontFamily: "'DM Mono',monospace" }}>1 240</span>
@@ -653,14 +653,14 @@ export default function App() {
                     <span className="jp" style={{ fontSize: 14 }}>先</span> 1 SenseiCoin = 1 minuta nauki
                   </span>
                   <h1 className="ht" style={{ fontSize: 48, fontWeight: 900, lineHeight: 1.1, letterSpacing: -2, marginBottom: 16, color: C.ink }}>
-                    Kup minuty.<br />Wybierz <span className="jp" style={{ color: C.accent }}>先生</span>.<br />
+                    Kup minuty.<br />Wybierz <span className="jp" style={{ color: C.accent }}>sensei</span>.<br />
                     <span style={{ color: C.inkSoft, fontWeight: 600, fontSize: ".7em" }}>Ucz się na swoich zasadach.</span>
                   </h1>
                   <p style={{ fontSize: 16, color: C.inkSoft, lineHeight: 1.75, maxWidth: 440, marginBottom: 28 }}>
                     Kup pakiet <strong style={{ color: C.gold }}>SenseiCoinów</strong>, połącz się z nauczycielem i płać za minuty. Bez abonamentów.
                   </p>
                   <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                    <button className="bm" onClick={() => nav("teachers")}>Znajdź Senseia →</button>
+                    <button className="bm" onClick={() => nav("senseis")}>Znajdź Senseia →</button>
                     <button className="bo" onClick={() => nav("investor")}>Dla inwestorów 📈</button>
                   </div>
                   <div style={{ display: "flex", gap: 32, marginTop: 36, borderTop: `1px solid ${C.border}`, paddingTop: 20, flexWrap: "wrap" }}>
@@ -718,9 +718,9 @@ export default function App() {
             </section>
 
             <section style={{ padding: "48px 40px", maxWidth: 1000, margin: "0 auto" }}>
-              <SectionTitle tag="先生 Online" tagColor={C.gold} tagBg={C.goldSoft} title="Dostępni" accent="teraz" sub="Kliknij 'Połącz teraz' aby zobaczyć pełne demo sesji z odliczaniem coinów." />
+              <SectionTitle tag="sensei Online" tagColor={C.gold} tagBg={C.goldSoft} title="Dostępni" accent="teraz" sub="Kliknij 'Połącz teraz' aby zobaczyć pełne demo sesji z odliczaniem coinów." />
               <div className="g3">
-                {TEACHERS.filter(t => t.online).slice(0, 3).map((t, i) => <TCard key={i} t={t} onConnect={handleConnect} />)}
+                {senseiS.filter(t => t.online).slice(0, 3).map((t, i) => <TCard key={i} t={t} onConnect={handleConnect} />)}
               </div>
             </section>
 
@@ -754,17 +754,17 @@ export default function App() {
         {page === "investor" && <InvestorPage nav={nav} />}
 
         {/* ─── LIVE SESSION ─── */}
-        {page === "session" && activeTeacher && (
+        {page === "session" && activesensei && (
           <div className="fu" style={{ minHeight: "100vh", background: "#0D0D1A", display: "flex", flexDirection: "column" }}>
             <div style={{ position: "fixed", top: 16, left: 260, background: C.coinGold, color: "#1B1B2F", padding: "4px 12px", borderRadius: 20, fontSize: 11, fontWeight: 700, zIndex: 200 }}>
               ⚡ DEMO — 10× prędkość
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 28px", background: "#12122A", borderBottom: "1px solid #2A2A42" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 9, background: `linear-gradient(135deg,${C.accentSoft},${C.goldSoft})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800, color: C.accent }}>{activeTeacher.ini}</div>
+                <div style={{ width: 36, height: 36, borderRadius: 9, background: `linear-gradient(135deg,${C.accentSoft},${C.goldSoft})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800, color: C.accent }}>{activesensei.ini}</div>
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>{activeTeacher.name}</div>
-                  <div style={{ fontSize: 11, color: "#888" }}>{activeTeacher.subject}</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>{activesensei.name}</div>
+                  <div style={{ fontSize: 11, color: "#888" }}>{activesensei.subject}</div>
                 </div>
                 <div style={{ width: 8, height: 8, borderRadius: "50%", background: C.green, marginLeft: 4, animation: "pulse 1.5s infinite" }} />
               </div>
@@ -774,7 +774,7 @@ export default function App() {
                   <span style={{ fontSize: 28, fontWeight: 900, color: studentCoins > 5 ? C.coinGold : C.accent, fontFamily: "'DM Mono',monospace", transition: "color .3s" }}>{studentCoins}</span>
                   <span className="jp" style={{ fontSize: 18, color: C.coinGold }}>先</span>
                 </div>
-                <div style={{ fontSize: 11, color: C.inkMuted }}>{activeTeacher.coinsPerMin} 先/min · ≈{studentCoins} min</div>
+                <div style={{ fontSize: 11, color: C.inkMuted }}>{activesensei.coinsPerMin} 先/min · ≈{studentCoins} min</div>
               </div>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
                 <div style={{ fontSize: 10, color: "#888", letterSpacing: 1.5, textTransform: "uppercase" }}>Czas sesji</div>
@@ -785,9 +785,9 @@ export default function App() {
             <div style={{ flex: 1, display: "flex" }}>
               <div style={{ flex: 1, background: "#0A0A18", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
                 <div style={{ textAlign: "center" }}>
-                  <div style={{ width: 120, height: 120, borderRadius: "50%", background: `linear-gradient(135deg,${C.accentSoft},${C.goldSoft})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 48, fontWeight: 800, color: C.accent, margin: "0 auto 16px", border: `3px solid ${C.accent}40` }}>{activeTeacher.ini}</div>
-                  <div style={{ color: "#fff", fontSize: 18, fontWeight: 600 }}>{activeTeacher.name}</div>
-                  <div style={{ color: "#888", fontSize: 13, marginTop: 4 }}>{activeTeacher.subject}</div>
+                  <div style={{ width: 120, height: 120, borderRadius: "50%", background: `linear-gradient(135deg,${C.accentSoft},${C.goldSoft})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 48, fontWeight: 800, color: C.accent, margin: "0 auto 16px", border: `3px solid ${C.accent}40` }}>{activesensei.ini}</div>
+                  <div style={{ color: "#fff", fontSize: 18, fontWeight: 600 }}>{activesensei.name}</div>
+                  <div style={{ color: "#888", fontSize: 13, marginTop: 4 }}>{activesensei.subject}</div>
                   <div style={{ marginTop: 16, display: "flex", justifyContent: "center", gap: 6 }}>
                     {[0.8, 1.0, 1.2].map((d, i) => <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: C.green, animation: `pulse ${d}s infinite` }} />)}
                   </div>
@@ -797,7 +797,7 @@ export default function App() {
                 </div>
                 {sessionSeconds % 6 === 0 && sessionSeconds > 0 && (
                   <div style={{ position: "absolute", top: "40%", left: "50%", transform: "translate(-50%,-50%)", fontSize: 22, color: C.coinGold, fontWeight: 900, fontFamily: "'DM Mono',monospace", animation: "fu .5s ease-out both", pointerEvents: "none", background: "rgba(0,0,0,.6)", padding: "6px 14px", borderRadius: 20 }}>
-                    −{activeTeacher.coinsPerMin} 先
+                    −{activesensei.coinsPerMin} 先
                   </div>
                 )}
               </div>
@@ -840,14 +840,14 @@ export default function App() {
         )}
 
         {/* ─── SESSION END ─── */}
-        {page === "session-end" && activeTeacher && (
+        {page === "session-end" && activesensei && (
           <section className="fu" style={{ padding: "60px 40px", maxWidth: 600, margin: "0 auto", textAlign: "center" }}>
             <div style={{ fontSize: 64, marginBottom: 16 }}>🎉</div>
             <h2 style={{ fontSize: 32, fontWeight: 900, color: C.ink, marginBottom: 8 }}>Lekcja zakończona!</h2>
             <p style={{ color: C.inkSoft, marginBottom: 32 }}>Świetna robota! Oto podsumowanie sesji.</p>
             <div className="card" style={{ padding: 28, marginBottom: 24, textAlign: "left" }}>
               {[
-                ["Nauczyciel", activeTeacher.name, C.ink],
+                ["Nauczyciel", activesensei.name, C.ink],
                 ["Czas sesji", formatTime(sessionSeconds), C.ink],
                 ["Wydane coiny", `-${sessionCoinsSpent} 先`, C.accent],
                 ["Pozostałe saldo", `${studentCoins} 先`, C.gold],
@@ -861,10 +861,10 @@ export default function App() {
 
             {/* Interactive star rating */}
             <div className="card" style={{ padding: 24, marginBottom: 24, background: C.coinBg, borderColor: `${C.coinGold}25` }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: C.ink, marginBottom: 14 }}>Oceń sesję z {activeTeacher.name}:</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: C.ink, marginBottom: 14 }}>Oceń sesję z {activesensei.name}:</div>
               <div style={{ display: "flex", justifyContent: "center", gap: 6, marginBottom: 10 }}>
                 {[1, 2, 3, 4, 5].map(n => (
-                  <span key={n} onMouseEnter={() => setHoveredStar(n)} onMouseLeave={() => setHoveredStar(0)} onClick={() => { setSessionRating(n); addToast(`Oceniłeś ${activeTeacher.name} na ${n} gwiazdek!`, "success", "⭐"); }}
+                  <span key={n} onMouseEnter={() => setHoveredStar(n)} onMouseLeave={() => setHoveredStar(0)} onClick={() => { setSessionRating(n); addToast(`Oceniłeś ${activesensei.name} na ${n} gwiazdek!`, "success", "⭐"); }}
                     style={{ fontSize: 36, cursor: "pointer", color: n <= (hoveredStar || sessionRating) ? C.coinGold : "#ddd", transition: "all .15s", transform: n <= (hoveredStar || sessionRating) ? "scale(1.2)" : "scale(1)", display: "inline-block" }}>★</span>
                 ))}
               </div>
@@ -875,7 +875,7 @@ export default function App() {
               )}
             </div>
             <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
-              <button className="bm" onClick={() => nav("teachers")}>Ucz się ponownie →</button>
+              <button className="bm" onClick={() => nav("senseis")}>Ucz się ponownie →</button>
               <button className="bo" onClick={() => nav("pricing")}>Doładuj 先</button>
             </div>
           </section>
@@ -893,19 +893,19 @@ export default function App() {
                 </div>
               ))}
             </div>
-            <button className="bm" onClick={() => nav("teachers")}>Znajdź Senseia →</button>
+            <button className="bm" onClick={() => nav("senseis")}>Znajdź Senseia →</button>
           </section>
         )}
 
         {/* ─── SUBJECTS ─── */}
         {page === "subjects" && (
           <section className="fu" style={{ padding: "48px 40px", maxWidth: 1000, margin: "0 auto" }}>
-            <SectionTitle tag="Przedmioty" tagColor={C.gold} tagBg={C.goldSoft} title="Znajdź" accent="先生" sub="Stawki w coinach za minutę lekcji." />
+            <SectionTitle tag="Przedmioty" tagColor={C.gold} tagBg={C.goldSoft} title="Znajdź" accent="sensei" sub="Stawki w coinach za minutę lekcji." />
             <div className="g2">
               {SUBJECTS.map((s, i) => (
-                <div key={i} className="card" style={{ padding: 22, cursor: "pointer" }} onClick={() => { setSf(s.name); nav("teachers"); }}>
+                <div key={i} className="card" style={{ padding: 22, cursor: "pointer" }} onClick={() => { setSf(s.name); nav("senseis"); }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                    <div><div style={{ fontSize: 32, marginBottom: 6 }}>{s.icon}</div><h3 style={{ fontSize: 18, fontWeight: 700, color: C.ink }}>{s.name}</h3><div style={{ fontSize: 12, color: C.inkMuted }}>{s.teachers} nauczycieli</div></div>
+                    <div><div style={{ fontSize: 32, marginBottom: 6 }}>{s.icon}</div><h3 style={{ fontSize: 18, fontWeight: 700, color: C.ink }}>{s.name}</h3><div style={{ fontSize: 12, color: C.inkMuted }}>{s.senseis} nauczycieli</div></div>
                     <div style={{ textAlign: "right" }}>
                       <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: C.coinBg, border: `1.5px solid ${C.coinGold}40`, borderRadius: 30, padding: "3px 10px", fontWeight: 700, color: C.gold, fontFamily: "'DM Mono',monospace", fontSize: 13 }}>
                         <span>先</span>{s.coins}
@@ -920,10 +920,10 @@ export default function App() {
           </section>
         )}
 
-        {/* ─── TEACHERS ─── */}
-        {page === "teachers" && (
+        {/* ─── senseiS ─── */}
+        {page === "senseis" && (
           <section className="fu" style={{ padding: "48px 40px", maxWidth: 1000, margin: "0 auto" }}>
-            <SectionTitle tag="先生 Sensei" tagColor={C.gold} tagBg={C.goldSoft} title="Nasi" accent="nauczyciele" sub="Zielona kropka = dostępny teraz. Kliknij 'Połącz teraz'." />
+            <SectionTitle tag="sensei Sensei" tagColor={C.gold} tagBg={C.goldSoft} title="Nasi" accent="nauczyciele" sub="Zielona kropka = dostępny teraz. Kliknij 'Połącz teraz'." />
             <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, background: C.bgCard, border: `1.5px solid ${C.border}`, borderRadius: 50, padding: "9px 18px", width: "100%", maxWidth: 400 }}>
                 <span style={{ color: C.inkMuted }}>🔍</span>
@@ -1036,7 +1036,7 @@ export default function App() {
                 </tr></thead>
                 <tbody>
                   {[
-                    ...(sessionCoinsSpent > 0 ? [["Teraz","Lekcja",`${activeTeacher?.subject} z ${activeTeacher?.name} (${sessionCoinsSpent} min)`,`-${sessionCoinsSpent}`,C.accent]] : []),
+                    ...(sessionCoinsSpent > 0 ? [["Teraz","Lekcja",`${activesensei?.subject} z ${activesensei?.name} (${sessionCoinsSpent} min)`,`-${sessionCoinsSpent}`,C.accent]] : []),
                     ["15.04.2026","Doładowanie","Pakiet Standard (30 先)","+30",C.green],
                     ["14.04.2026","Lekcja","Matematyka z Anną K. (23 min)","-23",C.accent],
                     ["12.04.2026","Lekcja","Angielski z Martą W. (15 min)","-15",C.accent],
@@ -1053,9 +1053,9 @@ export default function App() {
               </table>
             </div>
             <div className="g3">
-              <div className="card" style={{ padding: 20, textAlign: "center", cursor: "pointer" }} onClick={() => nav("teachers")}><div style={{ fontSize: 28, marginBottom: 6 }}>🔍</div><div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>Znajdź Senseia</div></div>
+              <div className="card" style={{ padding: 20, textAlign: "center", cursor: "pointer" }} onClick={() => nav("senseis")}><div style={{ fontSize: 28, marginBottom: 6 }}>🔍</div><div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>Znajdź Senseia</div></div>
               <div className="card" style={{ padding: 20, textAlign: "center", cursor: "pointer" }} onClick={() => nav("pricing")}><div style={{ fontSize: 28, marginBottom: 6 }}>🪙</div><div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>Kup SenseiCoiny</div></div>
-              <div className="card" style={{ padding: 20, textAlign: "center", cursor: "pointer", background: C.accentSoft }} onClick={() => { setUserRole("teacher"); nav("teacher-dashboard"); }}><div style={{ fontSize: 28, marginBottom: 6 }}>🔄</div><div style={{ fontSize: 14, fontWeight: 600, color: C.accent }}>Widok Nauczyciela</div></div>
+              <div className="card" style={{ padding: 20, textAlign: "center", cursor: "pointer", background: C.accentSoft }} onClick={() => { setUserRole("sensei"); nav("sensei-dashboard"); }}><div style={{ fontSize: 28, marginBottom: 6 }}>🔄</div><div style={{ fontSize: 14, fontWeight: 600, color: C.accent }}>Widok Nauczyciela</div></div>
             </div>
           </section>
         )}
@@ -1116,8 +1116,8 @@ export default function App() {
           </section>
         )}
 
-        {/* ─── TEACHER DASHBOARD ─── */}
-        {page === "teacher-dashboard" && (
+        {/* ─── sensei DASHBOARD ─── */}
+        {page === "sensei-dashboard" && (
           <section className="fu" style={{ padding: "48px 40px", maxWidth: 1000, margin: "0 auto" }}>
             <SectionTitle tag="👨‍🏫 Panel" tagColor={C.accent} tagBg={C.accentSoft} title="Panel" accent="Nauczyciela" />
             <div className="g4" style={{ marginBottom: 24 }}>
@@ -1161,10 +1161,10 @@ export default function App() {
           </section>
         )}
 
-        {/* ─── FOR TEACHERS ─── */}
-        {page === "for-teachers" && (
+        {/* ─── FOR senseiS ─── */}
+        {page === "for-senseis" && (
           <section className="fu" style={{ padding: "48px 40px", maxWidth: 1000, margin: "0 auto" }}>
-            <SectionTitle tag="Dla nauczycieli" tagColor={C.gold} tagBg={C.goldSoft} title="Zostań" accent="先生 Senseim" />
+            <SectionTitle tag="Dla nauczycieli" tagColor={C.gold} tagBg={C.goldSoft} title="Zostań" accent="sensei Senseim" />
             <div className="g2" style={{ alignItems: "start" }}>
               <div>
                 {[["80%","przychodów do Ciebie","Najniższa prowizja na polskim rynku."],["0 PLN","za rejestrację","Zacznij zarabiać od pierwszej lekcji."],["48h","wypłata","Stripe Connect. Szybkie przelewy."],["100%","kontroli","Ustalasz stawkę, grafik i zasady."]].map(([v,l,d],i) => (
@@ -1177,7 +1177,7 @@ export default function App() {
                   </div>
                 ))}
               </div>
-              <EarningsCalc onJoin={() => { setUserRole("teacher"); nav("teacher-dashboard"); }} />
+              <EarningsCalc onJoin={() => { setUserRole("sensei"); nav("sensei-dashboard"); }} />
             </div>
           </section>
         )}
