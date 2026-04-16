@@ -446,6 +446,8 @@ export default function App() {
   const [connectingsensei, setConnectingsensei] = useState(null);
   const [sessionRating, setSessionRating] = useState(0);
   const [hoveredStar, setHoveredStar] = useState(0);
+  const [streak, setStreak] = useState(7); // 7 дней серии
+const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
   const [toasts, setToasts] = useState([]);
   const sessionRef = useRef(null);
   const toastRef = useRef(0);
@@ -1005,6 +1007,80 @@ export default function App() {
         {/* ─── STUDENT DASHBOARD ─── */}
         {page === "dashboard" && (
           <section className="fu" style={{ padding: "48px 40px", maxWidth: 1000, margin: "0 auto" }}>
+            {/* STREAK CARD */}
+<div className="card" style={{ 
+  padding: 24, marginBottom: 24,
+  background: `linear-gradient(135deg, #1B1B2F, #2D1B4E)`,
+  border: `1px solid ${C.coinGold}30`, position: "relative", overflow: "hidden"
+}}>
+  {/* Декоративный фон */}
+  <div style={{ position: "absolute", top: -20, right: -20, fontSize: 80, opacity: .06 }}>🔥</div>
+  
+  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
+    <div>
+      <div style={{ fontSize: 11, color: "#888", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 6 }}>
+        Twoja seria nauki
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <span style={{ fontSize: 40 }}>🔥</span>
+        <div>
+          <span style={{ fontSize: 42, fontWeight: 900, color: C.coinGold, fontFamily: "'DM Mono',monospace" }}>{streak}</span>
+          <span style={{ fontSize: 16, color: "#888", marginLeft: 6 }}>dni z rzędu</span>
+        </div>
+      </div>
+      {/* Прогресс до следующей награды */}
+      <div style={{ marginTop: 10 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#777", marginBottom: 4 }}>
+          <span>Do nagrody: {10 - (streak % 10)} dni</span>
+          <span>+10 先 za 10-dniowy streak!</span>
+        </div>
+        <div style={{ background: "#2A2A42", borderRadius: 6, height: 6, overflow: "hidden" }}>
+          <div style={{ 
+            height: "100%", 
+            width: `${(streak % 10) * 10}%`,
+            background: `linear-gradient(90deg, ${C.coinGold}, #FF6B00)`,
+            borderRadius: 6, transition: "width .5s"
+          }} />
+        </div>
+      </div>
+    </div>
+    
+    {/* Кнопка получить бонус (если кратно 10) */}
+    {streak % 10 === 0 && !streakBonusClaimed ? (
+      <button className="bm" style={{ 
+        padding: "12px 22px", fontSize: 13,
+        background: `linear-gradient(135deg, ${C.coinGold}, #E8A800)`,
+        color: "#1B1B2F", flexShrink: 0
+      }} onClick={() => {
+        setStudentCoins(c => c + 10);
+        setStreakBonusClaimed(true);
+        addToast("+10 先 za 10-dniowy streak! 🔥", "coin", "先");
+      }}>
+        Odbierz +10 先 🎁
+      </button>
+    ) : (
+      <div style={{ textAlign: "center" }}>
+        {/* Мини-календарь последних 7 дней */}
+        <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
+          {["Pn","Wt","Śr","Cz","Pt","Sb","Nd"].map((d, i) => (
+            <div key={i} style={{ textAlign: "center" }}>
+              <div style={{ 
+                width: 28, height: 28, borderRadius: "50%",
+                background: i < (streak % 7 || 7) ? `linear-gradient(135deg, ${C.coinGold}, #E8A800)` : "#2A2A42",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 12
+              }}>
+                {i < (streak % 7 || 7) ? "✓" : ""}
+              </div>
+              <div style={{ fontSize: 9, color: "#666", marginTop: 2 }}>{d}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{ fontSize: 11, color: "#666" }}>Ucz się jutro, aby nie stracić serii!</div>
+      </div>
+    )}
+  </div>
+</div>
             <SectionTitle tag="🎒 Portfel" tagColor={C.gold} tagBg={C.goldSoft} title="Twój portfel" />
             <div className="card" style={{ padding: 28, marginBottom: 24, background: `linear-gradient(135deg,${C.sidebar},#2A2A42)`, border: "none" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
