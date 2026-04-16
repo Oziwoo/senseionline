@@ -203,7 +203,7 @@ function TCard({ t, onConnect }) {
     </div>
   );
 }
-
+//asd
 // ─── Interactive Earnings Calculator ───
 function EarningsCalc({ onJoin }) {
   const [hours, setHours] = useState(3);
