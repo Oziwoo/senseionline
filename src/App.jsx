@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { supabase } from './supabase';
 
 /* ═══════════════════════════════════════════════════════
    SENSEI ONLINE — senseionline.pl  ·  MVP v3 (Investor Demo)
-   New: Connecting animation · Investor page · Toast system
-        Interactive earnings calc · Star rating · Coin fx
    ═══════════════════════════════════════════════════════ */
 
 const C = {
@@ -96,7 +95,7 @@ function ToastContainer({ toasts }) {
 
 // ─── Connecting Overlay ───
 function ConnectingOverlay({ sensei, onConnected, onCancel }) {
-  const [phase, setPhase] = useState(0); // 0=searching, 1=found, 2=connecting
+  const [phase, setPhase] = useState(0);
   const [progress, setProgress] = useState(0);
   useEffect(() => {
     const t1 = setTimeout(() => setPhase(1), 2200);
@@ -108,61 +107,32 @@ function ConnectingOverlay({ sensei, onConnected, onCancel }) {
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(13,13,26,.92)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ textAlign: "center", maxWidth: 360, padding: 40 }}>
-        {/* Pulse rings */}
         <div style={{ position: "relative", width: 100, height: 100, margin: "0 auto 28px" }}>
           {phase < 1 && [0, 1, 2].map(i => (
-            <div key={i} style={{
-              position: "absolute", inset: -i * 18, borderRadius: "50%",
-              border: `2px solid ${C.coinGold}${30 - i * 8}`,
-              animation: `pingRing ${1.2 + i * 0.3}s ease-out ${i * 0.2}s infinite`,
-            }} />
+            <div key={i} style={{ position: "absolute", inset: -i * 18, borderRadius: "50%", border: `2px solid ${C.coinGold}${30 - i * 8}`, animation: `pingRing ${1.2 + i * 0.3}s ease-out ${i * 0.2}s infinite` }} />
           ))}
-          <div style={{
-            width: 100, height: 100, borderRadius: "50%",
-            background: phase >= 1
-              ? `linear-gradient(135deg, ${C.green}30, ${C.green}50)`
-              : `linear-gradient(135deg, ${C.accentSoft}, ${C.goldSoft})`,
-            border: `3px solid ${phase >= 1 ? C.green : C.coinGold}60`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: phase >= 1 ? 36 : 28, fontWeight: 800, color: phase >= 1 ? C.green : C.accent,
-            transition: "all .4s ease",
-          }}>
+          <div style={{ width: 100, height: 100, borderRadius: "50%", background: phase >= 1 ? `linear-gradient(135deg, ${C.green}30, ${C.green}50)` : `linear-gradient(135deg, ${C.accentSoft}, ${C.goldSoft})`, border: `3px solid ${phase >= 1 ? C.green : C.coinGold}60`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: phase >= 1 ? 36 : 28, fontWeight: 800, color: phase >= 1 ? C.green : C.accent, transition: "all .4s ease" }}>
             {phase >= 1 ? "✓" : sensei.ini}
           </div>
         </div>
-
         <div style={{ marginBottom: 8 }}>
           {phase === 0 && <div style={{ fontSize: 20, fontWeight: 700, color: "#fff", marginBottom: 6 }}>Szukam Senseia<span style={{ animation: "dots 1.2s infinite" }}>...</span></div>}
           {phase === 1 && <div style={{ fontSize: 20, fontWeight: 700, color: C.green, marginBottom: 6 }}>✓ Sensei znaleziony!</div>}
           {phase === 2 && <div style={{ fontSize: 20, fontWeight: 700, color: C.coinGold, marginBottom: 6 }}>Łączę z sesją...</div>}
         </div>
-
-        {phase === 0 && (
-          <div style={{ fontSize: 14, color: "#888", marginBottom: 20 }}>
-            Sprawdzam dostępność <strong style={{ color: "#ccc" }}>{sensei.name}</strong>
-          </div>
-        )}
-        {phase >= 1 && (
-          <div style={{ fontSize: 14, color: "#aaa", marginBottom: 20 }}>
-            <strong style={{ color: "#fff" }}>{sensei.name}</strong> jest gotowy!
-          </div>
-        )}
-
-        {/* Progress bar */}
+        {phase === 0 && <div style={{ fontSize: 14, color: "#888", marginBottom: 20 }}>Sprawdzam dostępność <strong style={{ color: "#ccc" }}>{sensei.name}</strong></div>}
+        {phase >= 1 && <div style={{ fontSize: 14, color: "#aaa", marginBottom: 20 }}><strong style={{ color: "#fff" }}>{sensei.name}</strong> jest gotowy!</div>}
         <div style={{ background: "#2A2A42", borderRadius: 8, height: 6, overflow: "hidden", marginBottom: 20 }}>
           <div style={{ height: "100%", width: `${progress}%`, background: phase >= 1 ? `linear-gradient(90deg, ${C.green}, #22c55e)` : `linear-gradient(90deg, ${C.accent}, ${C.coinGold})`, borderRadius: 8, transition: "width .1s linear" }} />
         </div>
-
-        <div style={{ fontSize: 12, color: "#555" }}>
-          ⚡ Zwykle zajmuje to &lt; 30 sekund
-        </div>
+        <div style={{ fontSize: 12, color: "#555" }}>⚡ Zwykle zajmuje to &lt; 30 sekund</div>
         <button onClick={onCancel} style={{ marginTop: 16, background: "none", border: "none", color: "#555", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>Anuluj</button>
       </div>
     </div>
   );
 }
 
-// ─── sensei Card ───
+// ─── Sensei Card ───
 function TCard({ t, onConnect }) {
   return (
     <div className="card" style={{ padding: 22, position: "relative" }}>
@@ -203,7 +173,7 @@ function TCard({ t, onConnect }) {
     </div>
   );
 }
-//asd
+
 // ─── Interactive Earnings Calculator ───
 function EarningsCalc({ onJoin }) {
   const [hours, setHours] = useState(3);
@@ -228,9 +198,7 @@ function EarningsCalc({ onJoin }) {
               <span style={{ fontSize: 13, fontWeight: 600, color: C.inkSoft }}>{label}</span>
               <span style={{ fontSize: 14, fontWeight: 700, color: C.ink, fontFamily: "'DM Mono',monospace" }}>{val} {unit}</span>
             </div>
-            <input type="range" min={min} max={max} step={step} value={val}
-              onChange={e => set(parseFloat(e.target.value))}
-              style={{ width: "100%", accentColor: C.accent, cursor: "pointer" }} />
+            <input type="range" min={min} max={max} step={step} value={val} onChange={e => set(parseFloat(e.target.value))} style={{ width: "100%", accentColor: C.accent, cursor: "pointer" }} />
           </div>
         ))}
       </div>
@@ -249,9 +217,7 @@ function EarningsCalc({ onJoin }) {
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
           <span style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>Do ręki / miesiąc</span>
-          <span style={{ fontSize: 32, fontWeight: 900, color: C.green, fontFamily: "'DM Mono',monospace" }}>
-            {takeHome.toFixed(0)} PLN
-          </span>
+          <span style={{ fontSize: 32, fontWeight: 900, color: C.green, fontFamily: "'DM Mono',monospace" }}>{takeHome.toFixed(0)} PLN</span>
         </div>
       </div>
       <button className="bm" style={{ width: "100%" }} onClick={onJoin}>Dołącz jako Sensei →</button>
@@ -276,14 +242,13 @@ function InvestorPage({ nav }) {
     ["Break-even", "~500 MAU", "Miesięcznych aktywnych", C.ink],
   ];
   const roadmap = [
-    { q: "Q2 2026", title: "MVP Launch", items: ["Pierwsze 100 nauczycieli", "Stripe + BLIK integracja", "10 przedmiotów"], done: false },
-    { q: "Q3 2026", title: "Traction", items: ["1 000 aktywnych uczniów", "Panel rodzica LIVE", "Mobile app (PWA)"], done: false },
-    { q: "Q4 2026", title: "Scale", items: ["5 000 MAU", "B2B (szkoły, centra)", "Ekspansja: CZ, SK"], done: false },
-    { q: "Q1 2027", title: "Series A", items: ["50 000 MAU", "GMV 2M PLN/mies.", "Pełna EU expansion"], done: false },
+    { q: "Q2 2026", title: "MVP Launch", items: ["Pierwsze 100 nauczycieli", "Stripe + BLIK integracja", "10 przedmiotów"] },
+    { q: "Q3 2026", title: "Traction", items: ["1 000 aktywnych uczniów", "Panel rodzica LIVE", "Mobile app (PWA)"] },
+    { q: "Q4 2026", title: "Scale", items: ["5 000 MAU", "B2B (szkoły, centra)", "Ekspansja: CZ, SK"] },
+    { q: "Q1 2027", title: "Series A", items: ["50 000 MAU", "GMV 2M PLN/mies.", "Pełna EU expansion"] },
   ];
   return (
     <section className="fu" style={{ padding: "48px 40px", maxWidth: 1100, margin: "0 auto" }}>
-      {/* Header */}
       <div style={{ textAlign: "center", marginBottom: 56 }}>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 16px", borderRadius: 30, background: C.accentSoft, border: `1px solid ${C.accent}30`, marginBottom: 16 }}>
           <span style={{ fontSize: 11, fontWeight: 700, color: C.accent, letterSpacing: 1.5, textTransform: "uppercase" }}>📊 Investor Deck</span>
@@ -295,8 +260,6 @@ function InvestorPage({ nav }) {
           Polska EdTech — rosnący rynek, udowodniony model (Tutlo), nieobsłużony segment: wszystkie przedmioty, poMinutowo, z panelem rodzica.
         </p>
       </div>
-
-      {/* Market size */}
       <div className="g4" style={{ marginBottom: 40 }}>
         {metrics.map((m, i) => (
           <div key={i} className="card" style={{ padding: 22, textAlign: "center", borderTop: `3px solid ${m.color}` }}>
@@ -307,34 +270,20 @@ function InvestorPage({ nav }) {
           </div>
         ))}
       </div>
-
       <div className="g2" style={{ marginBottom: 40, alignItems: "start" }}>
-        {/* Unit Economics */}
         <div className="card" style={{ padding: 28 }}>
           <h3 style={{ fontSize: 18, fontWeight: 700, color: C.ink, marginBottom: 20 }}>📐 Unit Economics</h3>
-          <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-            {unitEcon.map(([label, val, note, color], i) => (
-              <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: i < unitEcon.length - 1 ? `1px solid ${C.borderLight}` : "none" }}>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>{label}</div>
-                  <div style={{ fontSize: 11, color: C.inkMuted }}>{note}</div>
-                </div>
-                <span style={{ fontSize: 18, fontWeight: 800, color, fontFamily: "'DM Mono',monospace" }}>{val}</span>
-              </div>
-            ))}
-          </div>
+          {unitEcon.map(([label, val, note, color], i) => (
+            <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: i < unitEcon.length - 1 ? `1px solid ${C.borderLight}` : "none" }}>
+              <div><div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>{label}</div><div style={{ fontSize: 11, color: C.inkMuted }}>{note}</div></div>
+              <span style={{ fontSize: 18, fontWeight: 800, color, fontFamily: "'DM Mono',monospace" }}>{val}</span>
+            </div>
+          ))}
         </div>
-
-        {/* Revenue model */}
         <div>
           <div className="card" style={{ padding: 24, marginBottom: 16 }}>
             <h3 style={{ fontSize: 18, fontWeight: 700, color: C.ink, marginBottom: 16 }}>💸 Model przychodów</h3>
-            {[
-              ["GMV (transakcje)", "100%", C.inkSoft],
-              ["Prowizja platformy", "20% GMV", C.accent],
-              ["Premium Sensei listing", "+5% / nauczyciel", C.gold],
-              ["B2B (szkoły)", "Subskrypcja", C.teal],
-            ].map(([label, val, color], i) => (
+            {[["GMV (transakcje)", "100%", C.inkSoft], ["Prowizja platformy", "20% GMV", C.accent], ["Premium Sensei listing", "+5% / nauczyciel", C.gold], ["B2B (szkoły)", "Subskrypcja", C.teal]].map(([label, val, color], i) => (
               <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: i < 3 ? `1px solid ${C.borderLight}` : "none" }}>
                 <span style={{ fontSize: 13, color: C.inkSoft }}>{label}</span>
                 <span style={{ fontSize: 14, fontWeight: 700, color, fontFamily: "'DM Mono',monospace" }}>{val}</span>
@@ -343,13 +292,7 @@ function InvestorPage({ nav }) {
           </div>
           <div className="card" style={{ padding: 24, background: C.greenSoft, border: `1.5px solid ${C.green}30` }}>
             <h4 style={{ fontSize: 15, fontWeight: 700, color: C.ink, marginBottom: 14 }}>📊 Projekcja rok 1</h4>
-            {[
-              ["MAU (aktywni)", "5 000"],
-              ["Śr. GMV / user", "49 PLN/mies."],
-              ["GMV / miesiąc", "245 000 PLN"],
-              ["Przychód (20%)", "49 000 PLN/mies."],
-              ["Przychód rok 1", "~490 000 PLN"],
-            ].map(([l, v], i) => (
+            {[["MAU (aktywni)", "5 000"], ["Śr. GMV / user", "49 PLN/mies."], ["GMV / miesiąc", "245 000 PLN"], ["Przychód (20%)", "49 000 PLN/mies."], ["Przychód rok 1", "~490 000 PLN"]].map(([l, v], i) => (
               <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0" }}>
                 <span style={{ fontSize: 12, color: C.inkSoft }}>{l}</span>
                 <span style={{ fontSize: 13, fontWeight: 700, color: C.green, fontFamily: "'DM Mono',monospace" }}>{v}</span>
@@ -358,8 +301,6 @@ function InvestorPage({ nav }) {
           </div>
         </div>
       </div>
-
-      {/* Why us */}
       <div className="card" style={{ padding: 28, marginBottom: 40 }}>
         <h3 style={{ fontSize: 18, fontWeight: 700, color: C.ink, marginBottom: 20 }}>🏆 Dlaczego wygramy — moat</h3>
         <div className="g3">
@@ -376,8 +317,6 @@ function InvestorPage({ nav }) {
           ))}
         </div>
       </div>
-
-      {/* Roadmap */}
       <h3 style={{ fontSize: 20, fontWeight: 700, color: C.ink, marginBottom: 20 }}>🗺️ Roadmap</h3>
       <div className="g4" style={{ marginBottom: 40 }}>
         {roadmap.map((r, i) => (
@@ -392,18 +331,10 @@ function InvestorPage({ nav }) {
           </div>
         ))}
       </div>
-
-      {/* Team / Ask */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
         <div className="card" style={{ padding: 28, background: `linear-gradient(135deg, ${C.sidebar}, #2A2A42)`, border: "none" }}>
           <h3 style={{ fontSize: 18, fontWeight: 700, color: "#fff", marginBottom: 16 }}>🤝 Szukamy inwestora</h3>
-          {[
-            ["Runda", "Pre-seed"],
-            ["Cel", "500 000 PLN"],
-            ["Przeznaczenie", "Tech + Marketing"],
-            ["Equity", "Do negocjacji"],
-            ["Forma", "Sp. z o.o."],
-          ].map(([l, v], i) => (
+          {[["Runda", "Pre-seed"], ["Cel", "500 000 PLN"], ["Przeznaczenie", "Tech + Marketing"], ["Equity", "Do negocjacji"], ["Forma", "Sp. z o.o."]].map(([l, v], i) => (
             <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: i < 4 ? "1px solid #2A2A42" : "none" }}>
               <span style={{ fontSize: 13, color: "#888" }}>{l}</span>
               <span style={{ fontSize: 14, fontWeight: 700, color: C.coinGold, fontFamily: "'DM Mono',monospace" }}>{v}</span>
@@ -412,9 +343,7 @@ function InvestorPage({ nav }) {
         </div>
         <div className="card" style={{ padding: 28 }}>
           <h3 style={{ fontSize: 18, fontWeight: 700, color: C.ink, marginBottom: 16 }}>📬 Kontakt</h3>
-          <p style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.7, marginBottom: 16 }}>
-            Zainteresowany inwestycją lub partnerstwem? Chętnie omówimy szczegóły. Pełny deck na żądanie.
-          </p>
+          <p style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.7, marginBottom: 16 }}>Zainteresowany inwestycją lub partnerstwem? Chętnie omówimy szczegóły.</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {[["📧", "investor@senseionline.pl"], ["🌐", "senseionline.pl"], ["📍", "Wrocław, Polska"]].map(([ic, val], i) => (
               <div key={i} style={{ display: "flex", gap: 10, alignItems: "center", fontSize: 13, color: C.inkSoft }}>
@@ -446,11 +375,72 @@ export default function App() {
   const [connectingsensei, setConnectingsensei] = useState(null);
   const [sessionRating, setSessionRating] = useState(0);
   const [hoveredStar, setHoveredStar] = useState(0);
-  const [streak, setStreak] = useState(7); // 7 дней серии
-const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
+  const [streak, setStreak] = useState(7);
+  const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
   const [toasts, setToasts] = useState([]);
+  // ── Supabase auth states ──
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authName, setAuthName] = useState("");
+
   const sessionRef = useRef(null);
   const toastRef = useRef(0);
+
+  // ── Supabase session tracking ──
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) loadProfile(session.user.id);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) loadProfile(session.user.id);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const loadProfile = async (userId) => {
+    const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
+    if (data) {
+      setStudentCoins(data.coins ?? 42);
+      setStreak(data.streak ?? 0);
+    }
+  };
+
+  const handleRegister = async () => {
+    setAuthLoading(true);
+    const { error } = await supabase.auth.signUp({
+      email: authEmail,
+      password: authPassword,
+      options: { data: { name: authName } }
+    });
+    if (error) {
+      addToast(error.message, "error", "❌");
+    } else {
+      addToast("+5 SenseiCoinów za rejestrację!", "coin", "先");
+      nav("dashboard");
+    }
+    setAuthLoading(false);
+  };
+
+  const handleLogin = async () => {
+    setAuthLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({ email: authEmail, password: authPassword });
+    if (error) {
+      addToast("Błędny email lub hasło", "error", "❌");
+    } else {
+      nav("dashboard");
+    }
+    setAuthLoading(false);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    nav("home");
+  };
 
   const nav = p => { setPage(p); setSidebarOpen(false); };
 
@@ -481,7 +471,6 @@ const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
     addToast(`+${pack.coins} SenseiCoinów dodano!`, "coin", "先");
   };
 
-  // Session timer
   useEffect(() => {
     if (sessionActive && page === "session") {
       sessionRef.current = setInterval(() => {
@@ -572,10 +561,12 @@ const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
           <div><div style={{ fontSize: 16, fontWeight: 700 }}>sensei<span style={{ color: C.coinGold }}>online</span></div><div style={{ fontSize: 10, color: "#888", letterSpacing: 1 }}>senseionline.pl</div></div>
         </div>
         {userRole === "student" ? (
-          <div style={{ padding: "14px 20px", background: "#22223A", margin: "12px 12px 4px", borderRadius: 10, cursor: "pointer", animation: "glow 3s ease-in-out infinite" }} onClick={() => nav("dashboard")}>
-            <div style={{ fontSize: 10, color: "#888", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4 }}>Twoje SenseiCoiny</div>
+          <div style={{ padding: "14px 20px", background: studentCoins < 10 ? "#3A1A1A" : "#22223A", margin: "12px 12px 4px", borderRadius: 10, cursor: "pointer", animation: "glow 3s ease-in-out infinite", border: studentCoins < 10 ? `1px solid ${C.accent}50` : "none" }} onClick={() => nav("dashboard")}>
+            <div style={{ fontSize: 10, color: studentCoins < 10 ? C.accent : "#888", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4 }}>
+              {studentCoins < 10 ? "⚠ Kończy się saldo!" : "Twoje SenseiCoiny"}
+            </div>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ fontSize: 22, fontWeight: 800, color: C.coinGold, fontFamily: "'DM Mono',monospace", transition: "all .3s" }}>{studentCoins}</span>
+              <span style={{ fontSize: 22, fontWeight: 800, color: studentCoins < 10 ? C.accent : C.coinGold, fontFamily: "'DM Mono',monospace", transition: "all .3s" }}>{studentCoins}</span>
               <span className="jp" style={{ fontSize: 14, color: C.coinGold }}>先</span>
               <span style={{ fontSize: 11, color: "#777", marginLeft: "auto" }}>= {studentCoins} min</span>
             </div>
@@ -609,10 +600,17 @@ const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
           <button onClick={() => nav("pricing")} style={{ width: "100%", padding: "10px 0", borderRadius: 8, background: `linear-gradient(135deg, ${C.coinGold}, #E8A800)`, border: "none", color: "#1B1B2F", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>
             Doładuj SenseiCoiny
           </button>
-          <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-            <button onClick={() => nav("login")} style={{ flex: 1, padding: "8px 0", borderRadius: 6, border: "1px solid #444", background: "transparent", color: "#aaa", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>Zaloguj</button>
-            <button onClick={() => nav("register")} style={{ flex: 1, padding: "8px 0", borderRadius: 6, border: "none", background: C.accent, color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>Dołącz</button>
-          </div>
+          {user ? (
+            <div style={{ marginTop: 10 }}>
+              <div style={{ fontSize: 11, color: "#888", marginBottom: 6, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.email}</div>
+              <button onClick={handleLogout} style={{ width: "100%", padding: "8px 0", borderRadius: 6, border: "1px solid #444", background: "transparent", color: "#aaa", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>Wyloguj się</button>
+            </div>
+          ) : (
+            <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+              <button onClick={() => nav("login")} style={{ flex: 1, padding: "8px 0", borderRadius: 6, border: "1px solid #444", background: "transparent", color: "#aaa", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>Zaloguj</button>
+              <button onClick={() => nav("register")} style={{ flex: 1, padding: "8px 0", borderRadius: 6, border: "none", background: C.accent, color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>Dołącz</button>
+            </div>
+          )}
         </div>
       </aside>
 
@@ -720,7 +718,7 @@ const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
             </section>
 
             <section style={{ padding: "48px 40px", maxWidth: 1000, margin: "0 auto" }}>
-              <SectionTitle tag="sensei Online" tagColor={C.gold} tagBg={C.goldSoft} title="Dostępni" accent="teraz" sub="Kliknij 'Połącz teraz' aby zobaczyć pełne demo sesji z odliczaniem coinów." />
+              <SectionTitle tag="先生 Online" tagColor={C.gold} tagBg={C.goldSoft} title="Dostępni" accent="teraz" sub="Kliknij 'Połącz teraz' aby zobaczyć pełne demo sesji z odliczaniem coinów." />
               <div className="g3">
                 {senseiS.filter(t => t.online).slice(0, 3).map((t, i) => <TCard key={i} t={t} onConnect={handleConnect} />)}
               </div>
@@ -758,16 +756,11 @@ const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
         {/* ─── LIVE SESSION ─── */}
         {page === "session" && activesensei && (
           <div className="fu" style={{ minHeight: "100vh", background: "#0D0D1A", display: "flex", flexDirection: "column" }}>
-            <div style={{ position: "fixed", top: 16, left: 260, background: C.coinGold, color: "#1B1B2F", padding: "4px 12px", borderRadius: 20, fontSize: 11, fontWeight: 700, zIndex: 200 }}>
-              ⚡ DEMO — 10× prędkość
-            </div>
+            <div style={{ position: "fixed", top: 16, left: 260, background: C.coinGold, color: "#1B1B2F", padding: "4px 12px", borderRadius: 20, fontSize: 11, fontWeight: 700, zIndex: 200 }}>⚡ DEMO — 10× prędkość</div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 28px", background: "#12122A", borderBottom: "1px solid #2A2A42" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <div style={{ width: 36, height: 36, borderRadius: 9, background: `linear-gradient(135deg,${C.accentSoft},${C.goldSoft})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800, color: C.accent }}>{activesensei.ini}</div>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>{activesensei.name}</div>
-                  <div style={{ fontSize: 11, color: "#888" }}>{activesensei.subject}</div>
-                </div>
+                <div><div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>{activesensei.name}</div><div style={{ fontSize: 11, color: "#888" }}>{activesensei.subject}</div></div>
                 <div style={{ width: 8, height: 8, borderRadius: "50%", background: C.green, marginLeft: 4, animation: "pulse 1.5s infinite" }} />
               </div>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
@@ -848,20 +841,13 @@ const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
             <h2 style={{ fontSize: 32, fontWeight: 900, color: C.ink, marginBottom: 8 }}>Lekcja zakończona!</h2>
             <p style={{ color: C.inkSoft, marginBottom: 32 }}>Świetna robota! Oto podsumowanie sesji.</p>
             <div className="card" style={{ padding: 28, marginBottom: 24, textAlign: "left" }}>
-              {[
-                ["Nauczyciel", activesensei.name, C.ink],
-                ["Czas sesji", formatTime(sessionSeconds), C.ink],
-                ["Wydane coiny", `-${sessionCoinsSpent} 先`, C.accent],
-                ["Pozostałe saldo", `${studentCoins} 先`, C.gold],
-              ].map(([l, v, c], i) => (
+              {[["Nauczyciel", activesensei.name, C.ink], ["Czas sesji", formatTime(sessionSeconds), C.ink], ["Wydane coiny", `-${sessionCoinsSpent} 先`, C.accent], ["Pozostałe saldo", `${studentCoins} 先`, C.gold]].map(([l, v, c], i) => (
                 <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: i < 3 ? `1px solid ${C.border}` : "none" }}>
                   <span style={{ color: C.inkSoft, fontSize: 14 }}>{l}</span>
                   <span style={{ fontWeight: 700, color: c, fontFamily: "'DM Mono',monospace" }}>{v}</span>
                 </div>
               ))}
             </div>
-
-            {/* Interactive star rating */}
             <div className="card" style={{ padding: 24, marginBottom: 24, background: C.coinBg, borderColor: `${C.coinGold}25` }}>
               <div style={{ fontSize: 14, fontWeight: 600, color: C.ink, marginBottom: 14 }}>Oceń sesję z {activesensei.name}:</div>
               <div style={{ display: "flex", justifyContent: "center", gap: 6, marginBottom: 10 }}>
@@ -870,11 +856,7 @@ const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
                     style={{ fontSize: 36, cursor: "pointer", color: n <= (hoveredStar || sessionRating) ? C.coinGold : "#ddd", transition: "all .15s", transform: n <= (hoveredStar || sessionRating) ? "scale(1.2)" : "scale(1)", display: "inline-block" }}>★</span>
                 ))}
               </div>
-              {sessionRating > 0 && (
-                <div style={{ fontSize: 13, color: C.green, fontWeight: 600 }}>
-                  {["", "Słaba lekcja 😕", "Mogło być lepiej", "W porządku 👍", "Bardzo dobra!", "Perfekcyjna! ⭐"][sessionRating]}
-                </div>
-              )}
+              {sessionRating > 0 && <div style={{ fontSize: 13, color: C.green, fontWeight: 600 }}>{["", "Słaba lekcja 😕", "Mogło być lepiej", "W porządku 👍", "Bardzo dobra!", "Perfekcyjna! ⭐"][sessionRating]}</div>}
             </div>
             <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
               <button className="bm" onClick={() => nav("senseis")}>Ucz się ponownie →</button>
@@ -884,35 +866,28 @@ const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
         )}
 
         {/* ─── HOW IT WORKS ─── */}
-       {page === "how" && (
-  <section className="fu" style={{ padding: "48px 40px", maxWidth: 800, margin: "0 auto" }}>
-    <SectionTitle tag="Jak to działa" tagColor={C.teal} tagBg={C.tealSoft} title="Droga ucznia" accent="道" />
-    <div style={{ maxWidth: 640, margin: "0 auto" }}>
-             {[
-  ["先","Kup pakiet SenseiCoinów","Wybierz pakiet od 15 do 90 coinów. 1 SenseiCoin = 1 minuta nauki. Im większy pakiet, tym niższa cena za minutę. Płatność przez Stripe, BLIK lub Przelewy24 — szybko i bezpiecznie."],
-  ["🔍","Wybierz Senseia","Przeglądaj profile nauczycieli — ich doświadczenie, oceny, liczbę sesji i stawkę w coinach. Filtruj po przedmiocie. Każdy Sensei jest zweryfikowany przez nasz zespół."],
-  ["⚡","Połącz się w 30 sekund","Użyj przycisku 'Połącz teraz' — system automatycznie znajdzie dostępnego Senseia i połączy Cię z nim w czasie krótszym niż 30 sekund. Żadnego planowania z wyprzedzeniem."],
-  ["🎥","Ucz się w przeglądarce","Wideo HD, interaktywna tablica, czat i udostępnianie plików — wszystko wbudowane. Nic nie instalujesz. Minuty lekcji automatycznie odliczają SenseiCoiny z Twojego portfela."],
-  ["⭐","Oceń i wróć","Po każdej lekcji oceń Senseia gwiazdkami. Twoja historia sesji, wydane coiny i postępy w nauce — wszystko zapisane w Portfelu studenta. Buduj relację z ulubionym nauczycielem."],
-].map(([ic,t,d],i) => (
-  <div key={i} style={{ display: "flex", gap: 20, marginBottom: 32, alignItems: "flex-start" }}>
-    <div style={{
-      flex: "0 0 56px", height: 56, borderRadius: 16,
-      background: i === 0 ? C.coinBg : i === 2 ? C.accentSoft : C.bgAlt,
-      border: `1.5px solid ${i === 0 ? C.coinGold+"40" : i === 2 ? C.accent+"25" : C.border}`,
-      display: "flex", alignItems: "center", justifyContent: "center",
-      fontSize: 26, flexShrink: 0,
-      boxShadow: "0 2px 8px rgba(27,27,47,.06)"
-    }}>{ic}</div>
-    <div>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-        <h3 style={{ fontSize: 17, fontWeight: 700, color: C.ink }}>{t}</h3>
-        <span style={{ fontSize: 10, fontWeight: 600, color: C.inkMuted, background: C.bgAlt, border: `1px solid ${C.border}`, padding: "2px 8px", borderRadius: 20, letterSpacing: .5 }}>Krok {i+1}</span>
-      </div>
-      <p style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.75 }}>{d}</p>
-    </div>
-  </div>
-))}
+        {page === "how" && (
+          <section className="fu" style={{ padding: "48px 40px", maxWidth: 800, margin: "0 auto" }}>
+            <SectionTitle tag="Jak to działa" tagColor={C.teal} tagBg={C.tealSoft} title="Droga ucznia" accent="道" />
+            <div style={{ maxWidth: 640, margin: "0 auto" }}>
+              {[
+                ["🪙","Kup pakiet SenseiCoinów","Wybierz pakiet od 15 do 90 coinów. 1 SenseiCoin = 1 minuta nauki. Im większy pakiet, tym niższa cena za minutę. Płatność przez Stripe, BLIK lub Przelewy24 — szybko i bezpiecznie."],
+                ["🔍","Wybierz Senseia","Przeglądaj profile nauczycieli — ich doświadczenie, oceny, liczbę sesji i stawkę w coinach. Filtruj po przedmiocie. Każdy Sensei jest zweryfikowany przez nasz zespół."],
+                ["⚡","Połącz się w 30 sekund","Użyj przycisku 'Połącz teraz' — system automatycznie znajdzie dostępnego Senseia i połączy Cię z nim w czasie krótszym niż 30 sekund. Żadnego planowania z wyprzedzeniem."],
+                ["🎥","Ucz się w przeglądarce","Wideo HD, interaktywna tablica, czat i udostępnianie plików — wszystko wbudowane. Nic nie instalujesz. Minuty lekcji automatycznie odliczają SenseiCoiny z Twojego portfela."],
+                ["⭐","Oceń i wróć","Po każdej lekcji oceń Senseia gwiazdkami. Twoja historia sesji, wydane coiny i postępy w nauce — wszystko zapisane w Portfelu studenta. Buduj relację z ulubionym nauczycielem."],
+              ].map(([ic,t,d],i) => (
+                <div key={i} style={{ display: "flex", gap: 20, marginBottom: 32, alignItems: "flex-start" }}>
+                  <div style={{ flex: "0 0 56px", height: 56, borderRadius: 16, background: i === 0 ? C.coinBg : i === 2 ? C.accentSoft : C.bgAlt, border: `1.5px solid ${i === 0 ? C.coinGold+"40" : i === 2 ? C.accent+"25" : C.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, flexShrink: 0, boxShadow: "0 2px 8px rgba(27,27,47,.06)" }}>{ic}</div>
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                      <h3 style={{ fontSize: 17, fontWeight: 700, color: C.ink }}>{t}</h3>
+                      <span style={{ fontSize: 10, fontWeight: 600, color: C.inkMuted, background: C.bgAlt, border: `1px solid ${C.border}`, padding: "2px 8px", borderRadius: 20, letterSpacing: .5 }}>Krok {i+1}</span>
+                    </div>
+                    <p style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.75 }}>{d}</p>
+                  </div>
+                </div>
+              ))}
             </div>
             <button className="bm" onClick={() => nav("senseis")}>Znajdź Senseia →</button>
           </section>
@@ -921,7 +896,7 @@ const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
         {/* ─── SUBJECTS ─── */}
         {page === "subjects" && (
           <section className="fu" style={{ padding: "48px 40px", maxWidth: 1000, margin: "0 auto" }}>
-            <SectionTitle tag="Przedmioty" tagColor={C.gold} tagBg={C.goldSoft} title="Znajdź" accent="sensei" sub="Stawki w coinach za minutę lekcji." />
+            <SectionTitle tag="Przedmioty" tagColor={C.gold} tagBg={C.goldSoft} title="Znajdź" accent="Senseia" sub="Stawki w coinach za minutę lekcji." />
             <div className="g2">
               {SUBJECTS.map((s, i) => (
                 <div key={i} className="card" style={{ padding: 22, cursor: "pointer" }} onClick={() => { setSf(s.name); nav("senseis"); }}>
@@ -941,10 +916,10 @@ const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
           </section>
         )}
 
-        {/* ─── senseiS ─── */}
+        {/* ─── SENSEIS ─── */}
         {page === "senseis" && (
           <section className="fu" style={{ padding: "48px 40px", maxWidth: 1000, margin: "0 auto" }}>
-            <SectionTitle tag="sensei Sensei" tagColor={C.gold} tagBg={C.goldSoft} title="Nasi" accent="nauczyciele" sub="Zielona kropka = dostępny teraz. Kliknij 'Połącz teraz'." />
+            <SectionTitle tag="先生 Sensei" tagColor={C.gold} tagBg={C.goldSoft} title="Nasi" accent="nauczyciele" sub="Zielona kropka = dostępny teraz. Kliknij 'Połącz teraz'." />
             <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, background: C.bgCard, border: `1.5px solid ${C.border}`, borderRadius: 50, padding: "9px 18px", width: "100%", maxWidth: 400 }}>
                 <span style={{ color: C.inkMuted }}>🔍</span>
@@ -983,7 +958,7 @@ const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
                   {p.save > 0 && <div style={{ fontSize: 12, color: C.accent, fontWeight: 600, marginTop: 4 }}>Oszczędzasz {p.save}%</div>}
                   <div style={{ fontSize: 12, color: C.inkMuted, marginTop: 4 }}>{p.perMin.toFixed(2)} PLN / min</div>
                   <p style={{ fontSize: 12, color: C.inkSoft, lineHeight: 1.5, marginTop: 10 }}>{p.desc}</p>
-                  <button className="bm" onClick={() => buyCoins(p)} style={{ width: "100%", marginTop: 14, padding: "10px 0", fontSize: 13 }}>Kup {p.coins} 先</button>
+                  <button className="bm" onClick={() => { buyCoins(p); nav("senseis"); }} style={{ width: "100%", marginTop: 14, padding: "10px 0", fontSize: 13 }}>Kup {p.coins} 先</button>
                 </div>
               ))}
             </div>
@@ -1017,7 +992,7 @@ const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
                 </tbody>
               </table>
             </div>
-            <div style={{ textAlign: "center", marginTop: 8 }}>
+            <div style={{ textAlign: "center" }}>
               <button className="bm" onClick={() => nav("investor")}>Zobacz pełną analizę inwestorską →</button>
             </div>
           </section>
@@ -1027,79 +1002,50 @@ const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
         {page === "dashboard" && (
           <section className="fu" style={{ padding: "48px 40px", maxWidth: 1000, margin: "0 auto" }}>
             {/* STREAK CARD */}
-<div className="card" style={{ 
-  padding: 24, marginBottom: 24,
-  background: `linear-gradient(135deg, #1B1B2F, #2D1B4E)`,
-  border: `1px solid ${C.coinGold}30`, position: "relative", overflow: "hidden"
-}}>
-  {/* Декоративный фон */}
-  <div style={{ position: "absolute", top: -20, right: -20, fontSize: 80, opacity: .06 }}>🔥</div>
-  
-  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
-    <div>
-      <div style={{ fontSize: 11, color: "#888", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 6 }}>
-        Twoja seria nauki
-      </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <span style={{ fontSize: 40 }}>🔥</span>
-        <div>
-          <span style={{ fontSize: 42, fontWeight: 900, color: C.coinGold, fontFamily: "'DM Mono',monospace" }}>{streak}</span>
-          <span style={{ fontSize: 16, color: "#888", marginLeft: 6 }}>dni z rzędu</span>
-        </div>
-      </div>
-      {/* Прогресс до следующей награды */}
-      <div style={{ marginTop: 10 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#777", marginBottom: 4 }}>
-          <span>Do nagrody: {10 - (streak % 10)} dni</span>
-          <span>+10 先 za 10-dniowy streak!</span>
-        </div>
-        <div style={{ background: "#2A2A42", borderRadius: 6, height: 6, overflow: "hidden" }}>
-          <div style={{ 
-            height: "100%", 
-            width: `${(streak % 10) * 10}%`,
-            background: `linear-gradient(90deg, ${C.coinGold}, #FF6B00)`,
-            borderRadius: 6, transition: "width .5s"
-          }} />
-        </div>
-      </div>
-    </div>
-    
-    {/* Кнопка получить бонус (если кратно 10) */}
-    {streak % 10 === 0 && !streakBonusClaimed ? (
-      <button className="bm" style={{ 
-        padding: "12px 22px", fontSize: 13,
-        background: `linear-gradient(135deg, ${C.coinGold}, #E8A800)`,
-        color: "#1B1B2F", flexShrink: 0
-      }} onClick={() => {
-        setStudentCoins(c => c + 10);
-        setStreakBonusClaimed(true);
-        addToast("+10 先 za 10-dniowy streak! 🔥", "coin", "先");
-      }}>
-        Odbierz +10 先 🎁
-      </button>
-    ) : (
-      <div style={{ textAlign: "center" }}>
-        {/* Мини-календарь последних 7 дней */}
-        <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
-          {["Pn","Wt","Śr","Cz","Pt","Sb","Nd"].map((d, i) => (
-            <div key={i} style={{ textAlign: "center" }}>
-              <div style={{ 
-                width: 28, height: 28, borderRadius: "50%",
-                background: i < (streak % 7 || 7) ? `linear-gradient(135deg, ${C.coinGold}, #E8A800)` : "#2A2A42",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 12
-              }}>
-                {i < (streak % 7 || 7) ? "✓" : ""}
+            <div className="card" style={{ padding: 24, marginBottom: 24, background: `linear-gradient(135deg, #1B1B2F, #2D1B4E)`, border: `1px solid ${C.coinGold}30`, position: "relative", overflow: "hidden" }}>
+              <div style={{ position: "absolute", top: -20, right: -20, fontSize: 80, opacity: .06 }}>🔥</div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
+                <div>
+                  <div style={{ fontSize: 11, color: "#888", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 6 }}>Twoja seria nauki</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ fontSize: 40 }}>🔥</span>
+                    <div>
+                      <span style={{ fontSize: 42, fontWeight: 900, color: C.coinGold, fontFamily: "'DM Mono',monospace" }}>{streak}</span>
+                      <span style={{ fontSize: 16, color: "#888", marginLeft: 6 }}>dni z rzędu</span>
+                    </div>
+                  </div>
+                  <div style={{ marginTop: 10 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#777", marginBottom: 4 }}>
+                      <span>Do nagrody: {10 - (streak % 10)} dni</span>
+                      <span>+10 先 za 10-dniowy streak!</span>
+                    </div>
+                    <div style={{ background: "#2A2A42", borderRadius: 6, height: 6, overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${(streak % 10) * 10}%`, background: `linear-gradient(90deg, ${C.coinGold}, #FF6B00)`, borderRadius: 6, transition: "width .5s" }} />
+                    </div>
+                  </div>
+                </div>
+                {streak % 10 === 0 && !streakBonusClaimed ? (
+                  <button className="bm" style={{ padding: "12px 22px", fontSize: 13, background: `linear-gradient(135deg, ${C.coinGold}, #E8A800)`, color: "#1B1B2F", flexShrink: 0 }} onClick={() => { setStudentCoins(c => c + 10); setStreakBonusClaimed(true); addToast("+10 先 za 10-dniowy streak! 🔥", "coin", "先"); }}>
+                    Odbierz +10 先 🎁
+                  </button>
+                ) : (
+                  <div style={{ textAlign: "center" }}>
+                    <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
+                      {["Pn","Wt","Śr","Cz","Pt","Sb","Nd"].map((d, i) => (
+                        <div key={i} style={{ textAlign: "center" }}>
+                          <div style={{ width: 28, height: 28, borderRadius: "50%", background: i < (streak % 7 || 7) ? `linear-gradient(135deg, ${C.coinGold}, #E8A800)` : "#2A2A42", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12 }}>
+                            {i < (streak % 7 || 7) ? "✓" : ""}
+                          </div>
+                          <div style={{ fontSize: 9, color: "#666", marginTop: 2 }}>{d}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ fontSize: 11, color: "#666" }}>Ucz się jutro, aby nie stracić serii!</div>
+                  </div>
+                )}
               </div>
-              <div style={{ fontSize: 9, color: "#666", marginTop: 2 }}>{d}</div>
             </div>
-          ))}
-        </div>
-        <div style={{ fontSize: 11, color: "#666" }}>Ucz się jutro, aby nie stracić serii!</div>
-      </div>
-    )}
-  </div>
-</div>
+
             <SectionTitle tag="🎒 Portfel" tagColor={C.gold} tagBg={C.goldSoft} title="Twój portfel" />
             <div className="card" style={{ padding: 28, marginBottom: 24, background: `linear-gradient(135deg,${C.sidebar},#2A2A42)`, border: "none" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
@@ -1114,6 +1060,40 @@ const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
                 <button onClick={() => nav("pricing")} style={{ padding: "12px 28px", borderRadius: 50, border: "none", cursor: "pointer", fontFamily: "inherit", background: `linear-gradient(135deg,${C.coinGold},#E8A800)`, color: "#1B1B2F", fontWeight: 700, fontSize: 14 }}>+ Doładuj coiny</button>
               </div>
             </div>
+
+            {/* REFERRAL WIDGET */}
+            <div className="card" style={{ padding: 24, marginBottom: 24, background: `linear-gradient(135deg, ${C.tealSoft}, ${C.goldSoft})`, border: `1.5px solid ${C.teal}30` }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
+                <div style={{ flex: 1, minWidth: 220 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                    <span style={{ fontSize: 24 }}>🎁</span>
+                    <h3 style={{ fontSize: 16, fontWeight: 700, color: C.ink }}>Zaproś znajomego</h3>
+                  </div>
+                  <p style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.6, marginBottom: 12 }}>
+                    Twój znajomy rejestruje się przez Twój link → <strong style={{ color: C.teal }}>oboje dostajecie 10 先</strong> po jego pierwszej lekcji.
+                  </p>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, background: C.bgCard, border: `1.5px solid ${C.border}`, borderRadius: 10, padding: "8px 14px", flex: 1, minWidth: 180 }}>
+                      <span style={{ fontSize: 12, color: C.inkMuted, fontFamily: "'DM Mono',monospace", flex: 1 }}>senseionline.pl/r/OZIWOO</span>
+                      <button onClick={() => { navigator.clipboard?.writeText("https://senseionline.pl/r/OZIWOO"); addToast("Link skopiowany! 🔗", "success", "✓"); }} style={{ background: C.teal, color: "#fff", border: "none", borderRadius: 8, padding: "5px 12px", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", flexShrink: 0 }}>Kopiuj</button>
+                    </div>
+                    <button className="bo" style={{ fontSize: 12, padding: "8px 16px", flexShrink: 0 }} onClick={() => { const text = "Uczę się na SenseiOnline — płacisz tylko za minuty! Zarejestruj się i dostaniesz 10 先: https://senseionline.pl/r/OZIWOO"; window.open(`https://wa.me/?text=${encodeURIComponent(text)}`); }}>
+                      📲 WhatsApp
+                    </button>
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: 12, flexShrink: 0 }}>
+                  {[["👥", "3", "Zaproszonych"], ["先", "30", "Zarobione"], ["✅", "2", "Aktywnych"]].map(([ic, val, label], i) => (
+                    <div key={i} className="card" style={{ padding: "12px 16px", textAlign: "center", minWidth: 70 }}>
+                      <div style={{ fontSize: 18, marginBottom: 4 }}>{ic}</div>
+                      <div style={{ fontSize: 18, fontWeight: 800, color: C.ink, fontFamily: "'DM Mono',monospace" }}>{val}</div>
+                      <div style={{ fontSize: 10, color: C.inkMuted, marginTop: 2 }}>{label}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             <div className="g4" style={{ marginBottom: 24 }}>
               {[["📚","Ukończone lekcje","24",C.tealSoft],["⏱️","Czas nauki","18h 32min",C.accentSoft],["💰","Wydane coiny",`${387+sessionCoinsSpent} 先`,C.goldSoft],["⭐","Śr. ocena Senseia","4.9",C.coinBg]].map(([ic,l,v,bg],i) => (
                 <div key={i} className="card" style={{ padding: 18, textAlign: "center", background: bg }}>
@@ -1179,11 +1159,7 @@ const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
             </div>
             <div className="card" style={{ padding: 24, marginBottom: 20 }}>
               <h3 style={{ fontSize: 17, fontWeight: 700, color: C.ink, marginBottom: 16 }}>💳 Kontrola budżetu</h3>
-              {[
-                ["Miesięczny limit coinów","Kasia może wydać max. 60 先/mies.", "60 先", true],
-                ["Powiadomienia SMS","Po każdej lekcji", null, true],
-                ["Autoryzacja nowych Senseiów","Zatwierdzaj przed lekcją", null, false],
-              ].map(([t,s,val,on],i) => (
+              {[["Miesięczny limit coinów","Kasia może wydać max. 60 先/mies.", "60 先", true], ["Powiadomienia SMS","Po każdej lekcji", null, true], ["Autoryzacja nowych Senseiów","Zatwierdzaj przed lekcją", null, false]].map(([t,s,val,on],i) => (
                 <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 0", borderBottom: i < 2 ? `1px solid ${C.border}` : "none" }}>
                   <div><div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>{t}</div><div style={{ fontSize: 12, color: C.inkMuted }}>{s}</div></div>
                   {val ? <span style={{ fontSize: 16, fontWeight: 700, color: C.gold, fontFamily: "'DM Mono',monospace" }}>{val}</span>
@@ -1211,7 +1187,7 @@ const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
           </section>
         )}
 
-        {/* ─── sensei DASHBOARD ─── */}
+        {/* ─── SENSEI DASHBOARD ─── */}
         {page === "sensei-dashboard" && (
           <section className="fu" style={{ padding: "48px 40px", maxWidth: 1000, margin: "0 auto" }}>
             <SectionTitle tag="👨‍🏫 Panel" tagColor={C.accent} tagBg={C.accentSoft} title="Panel" accent="Nauczyciela" />
@@ -1256,10 +1232,10 @@ const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
           </section>
         )}
 
-        {/* ─── FOR senseiS ─── */}
+        {/* ─── FOR SENSEIS ─── */}
         {page === "for-senseis" && (
           <section className="fu" style={{ padding: "48px 40px", maxWidth: 1000, margin: "0 auto" }}>
-            <SectionTitle tag="Dla nauczycieli" tagColor={C.gold} tagBg={C.goldSoft} title="Zostań" accent="sensei Senseim" />
+            <SectionTitle tag="Dla nauczycieli" tagColor={C.gold} tagBg={C.goldSoft} title="Zostań" accent="先生 Senseim" />
             <div className="g2" style={{ alignItems: "start" }}>
               <div>
                 {[["80%","przychodów do Ciebie","Najniższa prowizja na polskim rynku."],["0 PLN","za rejestrację","Zacznij zarabiać od pierwszej lekcji."],["48h","wypłata","Stripe Connect. Szybkie przelewy."],["100%","kontroli","Ustalasz stawkę, grafik i zasady."]].map(([v,l,d],i) => (
@@ -1292,14 +1268,15 @@ const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
                 ))}
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {page === "register" && <input type="text" placeholder="Imię i nazwisko" style={{ padding: "12px 14px", borderRadius: 10, border: `1.5px solid ${C.border}`, background: C.bgCard, fontSize: 14, fontFamily: "inherit", color: C.ink, outline: "none" }} />}
-                <input type="email" placeholder="Adres e-mail" style={{ padding: "12px 14px", borderRadius: 10, border: `1.5px solid ${C.border}`, background: C.bgCard, fontSize: 14, fontFamily: "inherit", color: C.ink, outline: "none" }} />
-                <input type="password" placeholder="Hasło" style={{ padding: "12px 14px", borderRadius: 10, border: `1.5px solid ${C.border}`, background: C.bgCard, fontSize: 14, fontFamily: "inherit", color: C.ink, outline: "none" }} />
+                {page === "register" && (
+                  <input type="text" placeholder="Imię i nazwisko" value={authName} onChange={e => setAuthName(e.target.value)} style={{ padding: "12px 14px", borderRadius: 10, border: `1.5px solid ${C.border}`, background: C.bgCard, fontSize: 14, fontFamily: "inherit", color: C.ink, outline: "none" }} />
+                )}
+                <input type="email" placeholder="Adres e-mail" value={authEmail} onChange={e => setAuthEmail(e.target.value)} style={{ padding: "12px 14px", borderRadius: 10, border: `1.5px solid ${C.border}`, background: C.bgCard, fontSize: 14, fontFamily: "inherit", color: C.ink, outline: "none" }} />
+                <input type="password" placeholder="Hasło" value={authPassword} onChange={e => setAuthPassword(e.target.value)} style={{ padding: "12px 14px", borderRadius: 10, border: `1.5px solid ${C.border}`, background: C.bgCard, fontSize: 14, fontFamily: "inherit", color: C.ink, outline: "none" }} />
               </div>
-              <button className="bm" style={{ width: "100%", marginTop: 16 }} onClick={() => {
-                if (page === "register") { setStudentCoins(c => c + 5); addToast("+5 SenseiCoinów za rejestrację!", "coin", "先"); }
-                nav("dashboard");
-              }}>{page === "login" ? "Zaloguj się" : "Stwórz konto i odbierz 5 先"}</button>
+              <button className="bm" style={{ width: "100%", marginTop: 16, opacity: authLoading ? 0.7 : 1 }} onClick={page === "login" ? handleLogin : handleRegister} disabled={authLoading}>
+                {authLoading ? "Ładowanie..." : page === "login" ? "Zaloguj się" : "Stwórz konto i odbierz 5 先"}
+              </button>
               <div style={{ marginTop: 16, paddingTop: 14, borderTop: `1px solid ${C.border}` }}>
                 <button style={{ width: "100%", padding: 10, borderRadius: 10, border: `1.5px solid ${C.border}`, background: C.bgCard, fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "inherit", color: C.ink }}>G  Kontynuuj z Google</button>
               </div>
