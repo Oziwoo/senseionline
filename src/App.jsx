@@ -424,20 +424,6 @@ export default function App() {
   }
   setAuthLoading(false);
 };
-    setAuthLoading(true);
-    const { error } = await supabase.auth.signUp({
-      email: authEmail,
-      password: authPassword,
-      options: { data: { name: authName } }
-    });
-    if (error) {
-      addToast(error.message, "error", "❌");
-    } else {
-     nav("dashboard")
-    }
-    setAuthLoading(false);
-  };
-
   const handleLogin = async () => {
     setAuthLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email: authEmail, password: authPassword });
