@@ -366,7 +366,7 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sq, setSq] = useState("");
   const [sf, setSf] = useState(null);
-  const [studentCoins, setStudentCoins] = useState(42);
+  const [studentCoins, setStudentCoins] = useState(0);
   const [userRole, setUserRole] = useState("student");
   const [activesensei, setActivesensei] = useState(null);
   const [sessionSeconds, setSessionSeconds] = useState(0);
@@ -410,6 +410,20 @@ export default function App() {
   };
 
   const handleRegister = async () => {
+  setAuthLoading(true);
+  const { error } = await supabase.auth.signUp({
+    email: authEmail,
+    password: authPassword,
+    options: { data: { name: authName } }
+  });
+  if (error) {
+    addToast(error.message, "error", "❌");
+  } else {
+    // Никаких бонусных коинов — только редирект
+    nav("pricing"); // ← сразу на покупку а не дашборд
+  }
+  setAuthLoading(false);
+};
     setAuthLoading(true);
     const { error } = await supabase.auth.signUp({
       email: authEmail,
@@ -579,6 +593,14 @@ export default function App() {
               <span style={{ fontSize: 22, fontWeight: 800, color: studentCoins < 10 ? C.accent : C.coinGold, fontFamily: "'DM Mono',monospace", transition: "all .3s" }}>{studentCoins}</span>
               <span className="jp" style={{ fontSize: 14, color: C.coinGold }}>先</span>
               <span style={{ fontSize: 11, color: "#777", marginLeft: "auto" }}>= {studentCoins} min</span>
+              {studentCoins === 0 && (
+  <div onClick={() => nav("pricing")} style={{ 
+    marginTop: 6, fontSize: 10, color: C.coinGold, 
+    cursor: "pointer", textDecoration: "underline" 
+  }}>
+    Kup pierwsze coiny →
+  </div>
+)}
             </div>
           </div>
         ) : (
@@ -753,7 +775,7 @@ export default function App() {
               <div className="jp" style={{ fontSize: 40, color: C.coinGold, opacity: .15 }}>道</div>
               <h2 style={{ fontSize: 36, fontWeight: 900, letterSpacing: -1, color: C.ink }}>Gotowy na pierwszą lekcję?</h2>
               <p style={{ color: C.inkSoft, fontSize: 15, marginTop: 8, maxWidth: 440, margin: "8px auto 0" }}>
-                Zarejestruj się i odbierz <strong style={{ color: C.gold }}>5 darmowych SenseiCoinów</strong> na start.
+                Zarejestruj się i zacznij uczyć się już dziś. Kup SenseiCoiny i płać tylko za minuty.
               </p>
               <button className="bm" style={{ marginTop: 20, fontSize: 15, padding: "14px 36px" }} onClick={() => nav("register")}>Odbierz 5 darmowych 先 →</button>
             </section>
