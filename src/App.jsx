@@ -419,8 +419,7 @@ export default function App() {
     if (error) {
       addToast(error.message, "error", "❌");
     } else {
-      addToast("+5 SenseiCoinów za rejestrację!", "coin", "先");
-      nav("dashboard");
+     nav("dashboard")
     }
     setAuthLoading(false);
   };
@@ -466,10 +465,17 @@ export default function App() {
     addToast(`Połączono z ${connectingsensei?.name}!`, "success", "🎥");
   };
 
-  const buyCoins = (pack) => {
-    setStudentCoins(c => c + pack.coins);
-    addToast(`+${pack.coins} SenseiCoinów dodano!`, "coin", "先");
-  };
+ const buyCoins = async (pack) => {
+  const newBalance = studentCoins + pack.coins;
+  setStudentCoins(newBalance);
+  if (user) {
+    await supabase
+      .from('profiles')
+      .update({ coins: newBalance })
+      .eq('id', user.id);
+  }
+  addToast(`+${pack.coins} SenseiCoinów dodano!`, "coin", "先");
+};
 
   useEffect(() => {
     if (sessionActive && page === "session") {
@@ -477,10 +483,14 @@ export default function App() {
         setSessionSeconds(s => {
           const newS = s + 1;
           if (newS % 6 === 0) {
-            setStudentCoins(c => {
-              if (c <= 0) { endSession(); return 0; }
-              return c - (activesensei?.coinsPerMin || 1);
-            });
+           setStudentCoins(c => {
+  const newVal = c <= 0 ? 0 : c - (activesensei?.coinsPerMin || 1);
+  if (c <= 0) { endSession(); }
+  if (user) {
+    supabase.from('profiles').update({ coins: newVal }).eq('id', user.id);
+  }
+  return newVal;
+});
             setSessionCoinsSpent(sc => sc + (activesensei?.coinsPerMin || 1));
           }
           return newS;
