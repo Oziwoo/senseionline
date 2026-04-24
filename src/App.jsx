@@ -379,6 +379,10 @@ export default function App() {
   const [streak, setStreak] = useState(7);
   const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
   const [toasts, setToasts] = useState([]);
+  const [activeChild, setActiveChild] = useState("Kasia");
+  const [smsNotify, setSmsNotify] = useState(true);
+  const [authRequired, setAuthRequired] = useState(false);
+  const [monthLimit, setMonthLimit] = useState(60);
   // ── Supabase auth states ──
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(false);
@@ -1164,17 +1168,30 @@ export default function App() {
         {page === "parent" && (
           <section className="fu" style={{ padding: "48px 40px", maxWidth: 1000, margin: "0 auto" }}>
             <SectionTitle tag="👨‍👩‍👧 Dla rodziców" tagColor={C.teal} tagBg={C.tealSoft} title="Panel" accent="rodzica" sub="Pełna kontrola nad edukacją i wydatkami dziecka." />
+
+            {/* Выбор ребёнка */}
             <div style={{ display: "flex", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
-              {[["👧","Kasia","Liceum · kl. 3",true],["👦","Tomek","Podstawówka · kl. 7",false]].map(([ic,n,s,active],i) => (
-                <div key={i} className="card" style={{ padding: "12px 20px", display: "flex", alignItems: "center", gap: 10, cursor: "pointer", border: active ? `2px solid ${C.accent}` : undefined, background: active ? C.accentSoft : undefined, opacity: active ? 1 : .65 }}>
+              {[["👧","Kasia","Liceum · kl. 3"],["👦","Tomek","Podstawówka · kl. 7"]].map(([ic,n,s]) => (
+                <div key={n} className="card" onClick={() => setActiveChild(n)} style={{ padding: "12px 20px", display: "flex", alignItems: "center", gap: 10, cursor: "pointer", border: activeChild === n ? `2px solid ${C.accent}` : `1px solid ${C.border}`, background: activeChild === n ? C.accentSoft : C.bgCard, transition: "all .2s" }}>
                   <div style={{ width: 36, height: 36, borderRadius: 10, background: C.accentSoft, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>{ic}</div>
-                  <div><div style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>{n}</div><div style={{ fontSize: 11, color: C.inkMuted }}>{s}</div></div>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>{n}</div>
+                    <div style={{ fontSize: 11, color: C.inkMuted }}>{s}</div>
+                  </div>
+                  {activeChild === n && <span style={{ marginLeft: 4, fontSize: 10, background: C.accent, color: "#fff", padding: "2px 8px", borderRadius: 20, fontWeight: 600 }}>Aktywny</span>}
                 </div>
               ))}
-              <button className="bo" style={{ fontSize: 12, padding: "8px 16px" }}>+ Dodaj dziecko</button>
+              <button className="bo" style={{ fontSize: 12, padding: "8px 16px" }} onClick={() => addToast("Funkcja wkrótce dostępna!", "success", "🔜")}>+ Dodaj dziecko</button>
             </div>
+
+            {/* Статистика */}
             <div className="g4" style={{ marginBottom: 24 }}>
-              {[["🪙",`Saldo Kasi`,`${studentCoins} 先`,C.coinBg,C.gold],["📚","Lekcje / miesiąc","7",C.tealSoft,C.teal],["⏱️","Godziny nauki","5h 20min",C.accentSoft,C.accent],["💸","Wydatki kwiecień","49 PLN",C.bgAlt,C.ink]].map(([ic,l,v,bg,c],i) => (
+              {[
+                ["🪙", activeChild === "Kasia" ? `${studentCoins} 先` : "12 先", `Saldo ${activeChild}`, C.coinBg, C.gold],
+                ["📚", activeChild === "Kasia" ? "7" : "4", "Lekcje / miesiąc", C.tealSoft, C.teal],
+                ["⏱️", activeChild === "Kasia" ? "5h 20min" : "2h 45min", "Godziny nauki", C.accentSoft, C.accent],
+                ["💸", activeChild === "Kasia" ? "49 PLN" : "22 PLN", "Wydatki kwiecień", C.bgAlt, C.ink],
+              ].map(([ic,v,l,bg,c],i) => (
                 <div key={i} className="card" style={{ padding: 18, textAlign: "center", background: bg }}>
                   <div style={{ fontSize: 22, marginBottom: 4 }}>{ic}</div>
                   <div style={{ fontSize: 20, fontWeight: 800, color: c, fontFamily: "'DM Mono',monospace" }}>{v}</div>
@@ -1182,29 +1199,65 @@ export default function App() {
                 </div>
               ))}
             </div>
+
+            {/* Контроль бюджета */}
             <div className="card" style={{ padding: 24, marginBottom: 20 }}>
               <h3 style={{ fontSize: 17, fontWeight: 700, color: C.ink, marginBottom: 16 }}>💳 Kontrola budżetu</h3>
-              {[["Miesięczny limit coinów","Kasia może wydać max. 60 先/mies.", "60 先", true], ["Powiadomienia SMS","Po każdej lekcji", null, true], ["Autoryzacja nowych Senseiów","Zatwierdzaj przed lekcją", null, false]].map(([t,s,val,on],i) => (
-                <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 0", borderBottom: i < 2 ? `1px solid ${C.border}` : "none" }}>
-                  <div><div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>{t}</div><div style={{ fontSize: 12, color: C.inkMuted }}>{s}</div></div>
-                  {val ? <span style={{ fontSize: 16, fontWeight: 700, color: C.gold, fontFamily: "'DM Mono',monospace" }}>{val}</span>
-                    : <div style={{ width: 44, height: 24, borderRadius: 12, background: on ? C.green : C.bgAlt, border: on ? "none" : `1px solid ${C.border}`, position: "relative", cursor: "pointer" }}>
-                        <div style={{ position: "absolute", top: 2, width: 20, height: 20, borderRadius: "50%", background: "#fff", transition: "left .2s", left: on ? 22 : 2 }} />
-                      </div>}
+
+              {/* Лимит */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 0", borderBottom: `1px solid ${C.border}` }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>Miesięczny limit coinów</div>
+                  <div style={{ fontSize: 12, color: C.inkMuted }}>{activeChild} może wydać max. {monthLimit} 先/mies.</div>
                 </div>
-              ))}
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <button onClick={() => setMonthLimit(l => Math.max(10, l - 10))} style={{ width: 28, height: 28, borderRadius: "50%", border: `1px solid ${C.border}`, background: C.bgCard, cursor: "pointer", fontSize: 16, fontFamily: "inherit" }}>−</button>
+                  <span style={{ fontSize: 16, fontWeight: 700, color: C.gold, fontFamily: "'DM Mono',monospace", minWidth: 40, textAlign: "center" }}>{monthLimit} 先</span>
+                  <button onClick={() => setMonthLimit(l => Math.min(200, l + 10))} style={{ width: 28, height: 28, borderRadius: "50%", border: `1px solid ${C.border}`, background: C.bgCard, cursor: "pointer", fontSize: 16, fontFamily: "inherit" }}>+</button>
+                </div>
+              </div>
+
+              {/* SMS */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 0", borderBottom: `1px solid ${C.border}` }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>Powiadomienia SMS</div>
+                  <div style={{ fontSize: 12, color: C.inkMuted }}>Po każdej zakończonej lekcji</div>
+                </div>
+                <div onClick={() => { setSmsNotify(v => !v); addToast(smsNotify ? "SMS wyłączone" : "SMS włączone", "success", "📱"); }} style={{ width: 44, height: 24, borderRadius: 12, background: smsNotify ? C.green : C.bgAlt, border: smsNotify ? "none" : `1px solid ${C.border}`, position: "relative", cursor: "pointer", transition: "background .2s" }}>
+                  <div style={{ position: "absolute", top: 2, width: 20, height: 20, borderRadius: "50%", background: "#fff", transition: "left .2s", left: smsNotify ? 22 : 2, boxShadow: "0 1px 4px rgba(0,0,0,.2)" }} />
+                </div>
+              </div>
+
+              {/* Авторизация учителей */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 0" }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>Autoryzacja nowych Senseiów</div>
+                  <div style={{ fontSize: 12, color: C.inkMuted }}>Musisz zatwierdzić zanim {activeChild} zacznie lekcję</div>
+                </div>
+                <div onClick={() => { setAuthRequired(v => !v); addToast(authRequired ? "Autoryzacja wyłączona" : "Autoryzacja włączona", "success", "🔐"); }} style={{ width: 44, height: 24, borderRadius: 12, background: authRequired ? C.green : C.bgAlt, border: authRequired ? "none" : `1px solid ${C.border}`, position: "relative", cursor: "pointer", transition: "background .2s" }}>
+                  <div style={{ position: "absolute", top: 2, width: 20, height: 20, borderRadius: "50%", background: "#fff", transition: "left .2s", left: authRequired ? 22 : 2, boxShadow: "0 1px 4px rgba(0,0,0,.2)" }} />
+                </div>
+              </div>
             </div>
+
+            {/* Активность */}
             <div className="card" style={{ padding: 24 }}>
-              <h3 style={{ fontSize: 17, fontWeight: 700, color: C.ink, marginBottom: 16 }}>📋 Aktywność Kasi</h3>
-              {[
+              <h3 style={{ fontSize: 17, fontWeight: 700, color: C.ink, marginBottom: 16 }}>📋 Aktywność {activeChild}</h3>
+              {(activeChild === "Kasia" ? [
                 { ic: "🎥", t: "Lekcja Matematyki", sub: "Anna Kowalska · dzisiaj 14:00", val: "-23 先", col: C.tealSoft },
                 { ic: "⭐", t: "Ocena wystawiona", sub: "Anna Kowalska · dzisiaj 14:25", val: "★★★★★", col: C.coinBg },
                 { ic: "🎥", t: "Lekcja Angielskiego", sub: "Marta Wiśniewska · 12.04 16:00", val: "-15 先", col: C.tealSoft },
                 { ic: "🪙", t: "Doładowanie coinów", sub: "Pakiet Standard · 10.04", val: "+30 先", col: C.greenSoft },
-              ].map((item,i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 0", borderBottom: i < 3 ? `1px solid ${C.borderLight}` : "none" }}>
+              ] : [
+                { ic: "🎥", t: "Lekcja Matematyki", sub: "Piotr Nowak · wczoraj 15:00", val: "-12 先", col: C.tealSoft },
+                { ic: "🪙", t: "Doładowanie coinów", sub: "Pakiet Starter · 08.04", val: "+15 先", col: C.greenSoft },
+              ]).map((item,i,arr) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 0", borderBottom: i < arr.length - 1 ? `1px solid ${C.borderLight}` : "none" }}>
                   <div style={{ width: 40, height: 40, borderRadius: 10, background: item.col, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>{item.ic}</div>
-                  <div style={{ flex: 1 }}><div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>{item.t}</div><div style={{ fontSize: 12, color: C.inkMuted }}>{item.sub}</div></div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>{item.t}</div>
+                    <div style={{ fontSize: 12, color: C.inkMuted }}>{item.sub}</div>
+                  </div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: C.inkSoft, fontFamily: "'DM Mono',monospace" }}>{item.val}</div>
                 </div>
               ))}
