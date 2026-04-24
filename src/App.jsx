@@ -384,6 +384,7 @@ export default function App() {
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authName, setAuthName] = useState("");
+  const [authRole, setAuthRole] = useState("student");
 
   const sessionRef = useRef(null);
   const toastRef = useRef(0);
@@ -404,33 +405,38 @@ export default function App() {
   const loadProfile = async (userId) => {
     const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
     if (data) {
-      setStudentCoins(data.coins ?? 42);
+      setStudentCoins(data.coins ?? 0);
       setStreak(data.streak ?? 0);
+      if (data.role) setUserRole(data.role);
     }
   };
 
   const handleRegister = async () => {
-  setAuthLoading(true);
-  const { error } = await supabase.auth.signUp({
-    email: authEmail,
-    password: authPassword,
-    options: { data: { name: authName } }
-  });
-  if (error) {
-    addToast(error.message, "error", "❌");
-  } else {
-    // Никаких бонусных коинов — только редирект
-    nav("pricing"); // ← сразу на покупку а не дашборд
-  }
-  setAuthLoading(false);
-};
+    setAuthLoading(true);
+    const { error } = await supabase.auth.signUp({
+      email: authEmail,
+      password: authPassword,
+      options: { data: { name: authName, role: authRole } },
+    });
+    if (error) {
+      addToast(error.message, "error", "❌");
+    } else {
+      setUserRole(authRole);
+      nav(authRole === "student" ? "pricing" : "sensei-dashboard");
+    }
+    setAuthLoading(false);
+  };
   const handleLogin = async () => {
     setAuthLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email: authEmail, password: authPassword });
+    const { data, error } = await supabase.auth.signInWithPassword({ email: authEmail, password: authPassword });
     if (error) {
       addToast("Błędny email lub hasło", "error", "❌");
     } else {
-      nav("dashboard");
+      const { data: profile } = await supabase
+        .from("profiles").select("role").eq("id", data.user.id).single();
+      const role = profile?.role ?? "student";
+      setUserRole(role);
+      nav(role === "student" ? "dashboard" : "sensei-dashboard");
     }
     setAuthLoading(false);
   };
@@ -1148,7 +1154,7 @@ export default function App() {
             <div className="g3">
               <div className="card" style={{ padding: 20, textAlign: "center", cursor: "pointer" }} onClick={() => nav("senseis")}><div style={{ fontSize: 28, marginBottom: 6 }}>🔍</div><div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>Znajdź Senseia</div></div>
               <div className="card" style={{ padding: 20, textAlign: "center", cursor: "pointer" }} onClick={() => nav("pricing")}><div style={{ fontSize: 28, marginBottom: 6 }}>🪙</div><div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>Kup SenseiCoiny</div></div>
-              <div className="card" style={{ padding: 20, textAlign: "center", cursor: "pointer", background: C.accentSoft }} onClick={() => { setUserRole("sensei"); nav("sensei-dashboard"); }}><div style={{ fontSize: 28, marginBottom: 6 }}>🔄</div><div style={{ fontSize: 14, fontWeight: 600, color: C.accent }}>Widok Nauczyciela</div></div>
+              <div className="card" style={{ padding: 20, textAlign: "center", cursor: "pointer" }} onClick={() => nav("for-senseis")}><div style={{ fontSize: 28, marginBottom: 6 }}>📊</div><div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>Zostań Senseim</div></div>
             </div>
           </section>
         )}
@@ -1243,9 +1249,9 @@ export default function App() {
                 </div>
               ))}
             </div>
-            <div className="card" style={{ padding: 20, textAlign: "center", cursor: "pointer", background: C.accentSoft }} onClick={() => { setUserRole("student"); nav("dashboard"); }}>
-              <div style={{ fontSize: 24, marginBottom: 6 }}>🔄</div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: C.accent }}>Przełącz na widok ucznia</div>
+            <div className="card" style={{ padding: 20, textAlign: "center", cursor: "pointer" }} onClick={() => nav("for-senseis")}>
+              <div style={{ fontSize: 24, marginBottom: 6 }}>📈</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>Kalkulator zarobków</div>
             </div>
           </section>
         )}
@@ -1266,7 +1272,7 @@ export default function App() {
                   </div>
                 ))}
               </div>
-              <EarningsCalc onJoin={() => { setUserRole("sensei"); nav("sensei-dashboard"); }} />
+              <EarningsCalc onJoin={() => nav("register")} />
             </div>
           </section>
         )}
@@ -1287,7 +1293,17 @@ export default function App() {
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {page === "register" && (
-                  <input type="text" placeholder="Imię i nazwisko" value={authName} onChange={e => setAuthName(e.target.value)} style={{ padding: "12px 14px", borderRadius: 10, border: `1.5px solid ${C.border}`, background: C.bgCard, fontSize: 14, fontFamily: "inherit", color: C.ink, outline: "none" }} />
+                  <>
+                    <input type="text" placeholder="Imię i nazwisko" value={authName} onChange={e => setAuthName(e.target.value)} style={{ padding: "12px 14px", borderRadius: 10, border: `1.5px solid ${C.border}`, background: C.bgCard, fontSize: 14, fontFamily: "inherit", color: C.ink, outline: "none" }} />
+                    <div style={{ display: "flex", gap: 8 }}>
+                      {[["student", "👨‍🎓 Jestem uczniem"], ["sensei", "👨‍🏫 Jestem nauczycielem"]].map(([val, label]) => (
+                        <button key={val} type="button" onClick={() => setAuthRole(val)}
+                          style={{ flex: 1, padding: "10px 8px", borderRadius: 10, border: `1.5px solid ${authRole === val ? C.accent : C.border}`, background: authRole === val ? C.accentSoft : C.bgCard, color: authRole === val ? C.accent : C.inkSoft, fontWeight: authRole === val ? 700 : 500, fontSize: 13, cursor: "pointer", fontFamily: "inherit", transition: "all .2s" }}>
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </>
                 )}
                 <input type="email" placeholder="Adres e-mail" value={authEmail} onChange={e => setAuthEmail(e.target.value)} style={{ padding: "12px 14px", borderRadius: 10, border: `1.5px solid ${C.border}`, background: C.bgCard, fontSize: 14, fontFamily: "inherit", color: C.ink, outline: "none" }} />
                 <input type="password" placeholder="Hasło" value={authPassword} onChange={e => setAuthPassword(e.target.value)} style={{ padding: "12px 14px", borderRadius: 10, border: `1.5px solid ${C.border}`, background: C.bgCard, fontSize: 14, fontFamily: "inherit", color: C.ink, outline: "none" }} />
