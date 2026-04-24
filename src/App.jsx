@@ -466,15 +466,18 @@ export default function App() {
   };
 
   const onConnected = () => {
-    setActivesensei(connectingsensei);
-    setConnectingsensei(null);
-    setSessionSeconds(0);
-    setSessionCoinsSpent(0);
-    setSessionRating(0);
-    setSessionActive(true);
-    nav("session");
-    addToast(`Połączono z ${connectingsensei?.name}!`, "success", "🎥");
-  };
+  setActivesensei({
+    ...connectingsensei,
+    roomUrl: "https://whereby.com/senseionline"
+  });
+  setConnectingsensei(null);
+  setSessionSeconds(0);
+  setSessionCoinsSpent(0);
+  setSessionRating(0);
+  setSessionActive(true);
+  nav("session");
+  addToast(`Połączono z ${connectingsensei?.name}!`, "success", "🎥");
+};
 
  const buyCoins = async (pack) => {
   const newBalance = studentCoins + pack.coins;
