@@ -364,6 +364,7 @@ function InvestorPage({ nav }) {
 export default function App() {
   const [page, setPage] = useState("home");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sq, setSq] = useState("");
   const [sf, setSf] = useState(null);
   const [studentCoins, setStudentCoins] = useState(0);
@@ -515,25 +516,29 @@ export default function App() {
 
   const formatTime = s => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
-  const MENU = [
+  const MENU_STUDENT = [
     { section: "Menu" },
     { icon: "🏠", label: "Strona główna", p: "home" },
     { icon: "⚡", label: "Jak to działa", p: "how" },
     { icon: "📚", label: "Przedmioty", p: "subjects" },
     { icon: "👨‍🏫", label: "Nauczyciele", p: "senseis" },
-    ...(userRole === "student" ? [{ icon: "先", label: "Pakiety SenseiCoin", p: "pricing", isJp: true }] : []),
+    { icon: "先", label: "Pakiety SenseiCoin", p: "pricing", isJp: true },
+    { section: "Konto" },
+    { icon: "🎒", label: "Portfel studenta", p: "dashboard" },
+    { icon: "👨‍👩‍👧", label: "Panel rodzica", p: "parent" },
+  ];
+
+  const MENU_SENSEI = [
+    { section: "Menu" },
+    { icon: "🏠", label: "Strona główna", p: "home" },
+    { icon: "👨‍🏫", label: "Panel Nauczyciela", p: "sensei-dashboard" },
+    { icon: "🎓", label: "Dla nauczycieli", p: "for-senseis" },
     { section: "Analiza" },
     { icon: "📊", label: "Matryca konkurentów", p: "competitors" },
     { icon: "📈", label: "Dla inwestorów", p: "investor" },
-    { section: "Konto" },
-    ...(userRole === "student" ? [
-      { icon: "🎒", label: "Portfel studenta", p: "dashboard" },
-      { icon: "👨‍👩‍👧", label: "Panel rodzica", p: "parent" },
-      { icon: "🎓", label: "Dla nauczycieli", p: "for-senseis" },
-    ] : [
-      { icon: "👨‍🏫", label: "Panel Nauczyciela", p: "sensei-dashboard" }
-    ])
   ];
+
+  const MENU = userRole === "sensei" ? MENU_SENSEI : MENU_STUDENT;
 
   const ft = senseiS.filter(t => (!sf || t.subject === sf) && (!sq || (t.name + t.subject).toLowerCase().includes(sq.toLowerCase())));
 
@@ -571,71 +576,101 @@ export default function App() {
       {connectingsensei && <ConnectingOverlay sensei={connectingsensei} onConnected={onConnected} onCancel={() => setConnectingsensei(null)} />}
 
       {/* ══ SIDEBAR ══ */}
-      <aside className="sidebar-d" style={{ position: "fixed", top: 0, left: 0, bottom: 0, width: 240, background: C.sidebar, color: "#fff", zIndex: 100, display: "flex", flexDirection: "column", overflowY: "auto" }}>
-        <div style={{ padding: "20px 20px 16px", display: "flex", alignItems: "center", gap: 10, cursor: "pointer", borderBottom: "1px solid #2A2A42" }} onClick={() => nav("home")}>
-          <div style={{ width: 34, height: 34, borderRadius: 9, background: C.accent, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17, fontWeight: 900, fontFamily: "'Noto Serif JP',serif" }}>先</div>
-          <div><div style={{ fontSize: 16, fontWeight: 700 }}>sensei<span style={{ color: C.coinGold }}>online</span></div><div style={{ fontSize: 10, color: "#888", letterSpacing: 1 }}>senseionline.pl</div></div>
+      <aside className="sidebar-d" style={{
+        position: "fixed", top: 0, left: 0, bottom: 0,
+        width: sidebarCollapsed ? 60 : 240,
+        background: C.sidebar, color: "#fff", zIndex: 100,
+        display: "flex", flexDirection: "column", overflowY: "auto",
+        transition: "width .3s cubic-bezier(.23,1,.32,1)"
+      }}>
+        {/* Лого + кнопка свернуть */}
+        <div style={{ padding: "20px 12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid #2A2A42" }}>
+          {!sidebarCollapsed && (
+            <div style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }} onClick={() => nav("home")}>
+              <div style={{ width: 34, height: 34, borderRadius: 9, background: C.accent, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17, fontWeight: 900, fontFamily: "'Noto Serif JP',serif", flexShrink: 0 }}>先</div>
+              <div><div style={{ fontSize: 16, fontWeight: 700 }}>sensei<span style={{ color: C.coinGold }}>online</span></div><div style={{ fontSize: 10, color: "#888", letterSpacing: 1 }}>senseionline.pl</div></div>
+            </div>
+          )}
+          {sidebarCollapsed && (
+            <div style={{ width: 34, height: 34, borderRadius: 9, background: C.accent, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17, fontWeight: 900, fontFamily: "'Noto Serif JP',serif", cursor: "pointer", margin: "0 auto" }} onClick={() => nav("home")}>先</div>
+          )}
+          {!sidebarCollapsed && (
+            <button onClick={() => setSidebarCollapsed(true)} style={{ background: "none", border: "none", color: "#666", cursor: "pointer", fontSize: 18, padding: 4, flexShrink: 0 }}>←</button>
+          )}
         </div>
-        {userRole === "student" ? (
-          <div style={{ padding: "14px 20px", background: studentCoins < 10 ? "#3A1A1A" : "#22223A", margin: "12px 12px 4px", borderRadius: 10, cursor: "pointer", animation: "glow 3s ease-in-out infinite", border: studentCoins < 10 ? `1px solid ${C.accent}50` : "none" }} onClick={() => nav("dashboard")}>
-            <div style={{ fontSize: 10, color: studentCoins < 10 ? C.accent : "#888", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4 }}>
-              {studentCoins < 10 ? "⚠ Kończy się saldo!" : "Twoje SenseiCoiny"}
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ fontSize: 22, fontWeight: 800, color: studentCoins < 10 ? C.accent : C.coinGold, fontFamily: "'DM Mono',monospace", transition: "all .3s" }}>{studentCoins}</span>
-              <span className="jp" style={{ fontSize: 14, color: C.coinGold }}>先</span>
-              <span style={{ fontSize: 11, color: "#777", marginLeft: "auto" }}>= {studentCoins} min</span>
-              {studentCoins === 0 && (
-  <div onClick={() => nav("pricing")} style={{ 
-    marginTop: 6, fontSize: 10, color: C.coinGold, 
-    cursor: "pointer", textDecoration: "underline" 
-  }}>
-    Kup pierwsze coiny →
-  </div>
-)}
-            </div>
-          </div>
-        ) : (
-          <div style={{ padding: "14px 20px", background: "#22223A", margin: "12px 12px 4px", borderRadius: 10, cursor: "pointer" }} onClick={() => nav("sensei-dashboard")}>
-            <div style={{ fontSize: 10, color: "#888", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4 }}>Zarobki (kwiecień)</div>
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ fontSize: 22, fontWeight: 800, color: C.green, fontFamily: "'DM Mono',monospace" }}>1 240</span>
-              <span style={{ fontSize: 14, color: C.green }}>PLN</span>
-            </div>
-          </div>
+
+        {/* Кнопка развернуть когда свёрнут */}
+        {sidebarCollapsed && (
+          <button onClick={() => setSidebarCollapsed(false)} style={{ background: "none", border: "none", color: "#666", cursor: "pointer", fontSize: 18, padding: "12px 0", textAlign: "center" }}>→</button>
         )}
+
+        {/* Виджет баланса */}
+        {!sidebarCollapsed && (
+          userRole === "student" ? (
+            <div style={{ padding: "14px 20px", background: studentCoins < 10 ? "#3A1A1A" : "#22223A", margin: "12px 12px 4px", borderRadius: 10, cursor: "pointer", animation: "glow 3s ease-in-out infinite", border: studentCoins < 10 ? `1px solid ${C.accent}50` : "none" }} onClick={() => nav("dashboard")}>
+              <div style={{ fontSize: 10, color: studentCoins < 10 ? C.accent : "#888", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4 }}>
+                {studentCoins < 10 ? "⚠ Kończy się saldo!" : "Twoje SenseiCoiny"}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: 22, fontWeight: 800, color: studentCoins < 10 ? C.accent : C.coinGold, fontFamily: "'DM Mono',monospace", transition: "all .3s" }}>{studentCoins}</span>
+                <span className="jp" style={{ fontSize: 14, color: C.coinGold }}>先</span>
+                <span style={{ fontSize: 11, color: "#777", marginLeft: "auto" }}>= {studentCoins} min</span>
+              </div>
+              {studentCoins === 0 && (
+                <div style={{ marginTop: 6, fontSize: 10, color: C.coinGold, cursor: "pointer", textDecoration: "underline" }}>
+                  Kup pierwsze coiny →
+                </div>
+              )}
+            </div>
+          ) : (
+            <div style={{ padding: "14px 20px", background: "#22223A", margin: "12px 12px 4px", borderRadius: 10, cursor: "pointer" }} onClick={() => nav("sensei-dashboard")}>
+              <div style={{ fontSize: 10, color: "#888", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4 }}>Zarobki (kwiecień)</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: 22, fontWeight: 800, color: C.green, fontFamily: "'DM Mono',monospace" }}>1 240</span>
+                <span style={{ fontSize: 14, color: C.green }}>PLN</span>
+              </div>
+            </div>
+          )
+        )}
+
+        {/* Навигация */}
         <nav style={{ flex: 1, padding: "8px 0" }}>
           {MENU.map((item, i) => {
-            if (item.section) return <div key={i} style={{ padding: "16px 20px 6px", fontSize: 10, fontWeight: 600, color: "#666", letterSpacing: 1.5, textTransform: "uppercase" }}>{item.section}</div>;
+            if (item.section) return !sidebarCollapsed
+              ? <div key={i} style={{ padding: "16px 20px 6px", fontSize: 10, fontWeight: 600, color: "#666", letterSpacing: 1.5, textTransform: "uppercase" }}>{item.section}</div>
+              : <div key={i} style={{ height: 1, background: "#2A2A42", margin: "8px 12px" }} />;
             const active = page === item.p;
-            const isInvestor = item.p === "investor";
             return (
-              <div key={i} onClick={() => nav(item.p)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 20px", margin: "1px 8px", borderRadius: 8, cursor: "pointer", transition: "all .2s", background: active ? C.accent : isInvestor && !active ? C.accentSoft + "20" : "transparent", color: active ? "#fff" : isInvestor ? C.coinGold : "#bbb", fontWeight: active ? 600 : 400, fontSize: 14 }}
+              <div key={i} onClick={() => nav(item.p)} title={sidebarCollapsed ? item.label : ""}
+                style={{ display: "flex", alignItems: "center", gap: 10, padding: sidebarCollapsed ? "10px 0" : "10px 20px", margin: "1px 8px", borderRadius: 8, cursor: "pointer", transition: "all .2s", background: active ? C.accent : "transparent", color: active ? "#fff" : "#bbb", fontWeight: active ? 600 : 400, fontSize: 14, justifyContent: sidebarCollapsed ? "center" : "flex-start" }}
                 onMouseEnter={e => { if (!active) e.currentTarget.style.background = C.sidebarHover; }}
-                onMouseLeave={e => { if (!active) e.currentTarget.style.background = isInvestor ? C.accentSoft + "20" : "transparent"; }}>
-                <span style={{ fontSize: item.isJp ? 14 : 16, fontFamily: item.isJp ? "'Noto Serif JP',serif" : "inherit", width: 22, textAlign: "center" }}>{item.icon}</span>
-                <span>{item.label}</span>
-                {isInvestor && !active && <span style={{ marginLeft: "auto", fontSize: 9, fontWeight: 700, background: C.coinGold, color: "#1B1B2F", padding: "1px 6px", borderRadius: 8, letterSpacing: .5 }}>NEW</span>}
+                onMouseLeave={e => { if (!active) e.currentTarget.style.background = "transparent"; }}>
+                <span style={{ fontSize: item.isJp ? 14 : 16, fontFamily: item.isJp ? "'Noto Serif JP',serif" : "inherit", width: 22, textAlign: "center", flexShrink: 0 }}>{item.icon}</span>
+                {!sidebarCollapsed && <span>{item.label}</span>}
               </div>
             );
           })}
         </nav>
-        <div style={{ padding: "12px 20px", borderTop: "1px solid #2A2A42" }}>
-          <button onClick={() => nav("pricing")} style={{ width: "100%", padding: "10px 0", borderRadius: 8, background: `linear-gradient(135deg, ${C.coinGold}, #E8A800)`, border: "none", color: "#1B1B2F", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>
-            Doładuj SenseiCoiny
-          </button>
-          {user ? (
-            <div style={{ marginTop: 10 }}>
-              <div style={{ fontSize: 11, color: "#888", marginBottom: 6, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.email}</div>
-              <button onClick={handleLogout} style={{ width: "100%", padding: "8px 0", borderRadius: 6, border: "1px solid #444", background: "transparent", color: "#aaa", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>Wyloguj się</button>
-            </div>
-          ) : (
-            <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-              <button onClick={() => nav("login")} style={{ flex: 1, padding: "8px 0", borderRadius: 6, border: "1px solid #444", background: "transparent", color: "#aaa", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>Zaloguj</button>
-              <button onClick={() => nav("register")} style={{ flex: 1, padding: "8px 0", borderRadius: 6, border: "none", background: C.accent, color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>Dołącz</button>
-            </div>
-          )}
-        </div>
+
+        {/* Кнопки логина/выхода */}
+        {!sidebarCollapsed && (
+          <div style={{ padding: "12px 20px", borderTop: "1px solid #2A2A42" }}>
+            <button onClick={() => nav("pricing")} style={{ width: "100%", padding: "10px 0", borderRadius: 8, background: `linear-gradient(135deg, ${C.coinGold}, #E8A800)`, border: "none", color: "#1B1B2F", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>
+              Doładuj SenseiCoiny
+            </button>
+            {user ? (
+              <div style={{ marginTop: 10 }}>
+                <div style={{ fontSize: 11, color: "#888", marginBottom: 6, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.email}</div>
+                <button onClick={handleLogout} style={{ width: "100%", padding: "8px 0", borderRadius: 6, border: "1px solid #444", background: "transparent", color: "#aaa", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>Wyloguj się</button>
+              </div>
+            ) : (
+              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                <button onClick={() => nav("login")} style={{ flex: 1, padding: "8px 0", borderRadius: 6, border: "1px solid #444", background: "transparent", color: "#aaa", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>Zaloguj</button>
+                <button onClick={() => nav("register")} style={{ flex: 1, padding: "8px 0", borderRadius: 6, border: "none", background: C.accent, color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>Dołącz</button>
+              </div>
+            )}
+          </div>
+        )}
       </aside>
 
       {/* ══ MOBILE HEADER ══ */}
@@ -664,7 +699,7 @@ export default function App() {
       )}
 
       {/* ══ MAIN CONTENT ══ */}
-      <main className="main-content" style={{ marginLeft: 240, minHeight: "100vh" }}>
+      <main className="main-content" style={{ marginLeft: sidebarCollapsed ? 60 : 240, minHeight: "100vh", transition: "margin-left .3s cubic-bezier(.23,1,.32,1)" }}>
 
         {/* ─── HOME ─── */}
         {page === "home" && (
