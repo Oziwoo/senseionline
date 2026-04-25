@@ -380,6 +380,11 @@ export default function App() {
   const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
   const [toasts, setToasts] = useState([]);
   const [activeSessions, setActiveSessions] = useState([]);
+  const [senseiEarnings, setSenseiEarnings] = useState(0);
+  const [activeRequests, setActiveRequests] = useState([
+    { id: 1, name: "Kasia M.", subject: "Matematyka", time: "teraz", avatar: "KM" },
+    { id: 2, name: "Olek T.", subject: "Fizyka", time: "2 min temu", avatar: "OT" },
+  ]);
   const [activeChild, setActiveChild] = useState("Kasia");
   const [smsNotify, setSmsNotify] = useState(true);
   const [authRequired, setAuthRequired] = useState(false);
@@ -523,22 +528,26 @@ export default function App() {
         setSessionSeconds(s => {
           const newS = s + 1;
           if (newS % 6 === 0) {
-           setStudentCoins(c => {
-  const newVal = c <= 0 ? 0 : c - (activesensei?.coinsPerMin || 1);
-  if (c <= 0) { endSession(); }
-  if (user) {
-    supabase.from('profiles').update({ coins: newVal }).eq('id', user.id);
-  }
-  return newVal;
-});
-            setSessionCoinsSpent(sc => sc + (activesensei?.coinsPerMin || 1));
+            if (userRole === "sensei") {
+              setSenseiEarnings(e => e + (activesensei?.coinsPerMin || 1));
+            } else {
+              setStudentCoins(c => {
+                const newVal = c <= 0 ? 0 : c - (activesensei?.coinsPerMin || 1);
+                if (c <= 0) endSession();
+                if (user) {
+                  supabase.from('profiles').update({ coins: newVal }).eq('id', user.id);
+                }
+                return newVal;
+              });
+              setSessionCoinsSpent(sc => sc + (activesensei?.coinsPerMin || 1));
+            }
           }
           return newS;
         });
       }, 1000);
     }
     return () => clearInterval(sessionRef.current);
-  }, [sessionActive, page, activesensei]);
+  }, [sessionActive, page, activesensei, userRole]);
 
   const endSession = () => {
     clearInterval(sessionRef.current);
@@ -867,12 +876,25 @@ export default function App() {
                 <div style={{ width: 8, height: 8, borderRadius: "50%", background: C.green, marginLeft: 4, animation: "pulse 1.5s infinite" }} />
               </div>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                <div style={{ fontSize: 10, color: "#888", letterSpacing: 1.5, textTransform: "uppercase" }}>Saldo</div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#22223A", padding: "8px 18px", borderRadius: 12, animation: sessionSeconds % 6 === 0 && sessionSeconds > 0 ? "coinPop .3s ease" : "none" }}>
-                  <span style={{ fontSize: 28, fontWeight: 900, color: studentCoins > 5 ? C.coinGold : C.accent, fontFamily: "'DM Mono',monospace", transition: "color .3s" }}>{studentCoins}</span>
-                  <span className="jp" style={{ fontSize: 18, color: C.coinGold }}>先</span>
+                <div style={{ fontSize: 10, color: "#888", letterSpacing: 1.5, textTransform: "uppercase" }}>
+                  {userRole === "sensei" ? "Zarobek" : "Saldo"}
                 </div>
-                <div style={{ fontSize: 11, color: C.inkMuted }}>{activesensei.coinsPerMin} 先/min · ≈{studentCoins} min</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#22223A", padding: "8px 18px", borderRadius: 12 }}>
+                  {userRole === "sensei" ? (
+                    <>
+                      <span style={{ fontSize: 28, fontWeight: 900, color: C.green, fontFamily: "'DM Mono',monospace" }}>{senseiEarnings}</span>
+                      <span style={{ fontSize: 18, color: C.green }}>PLN</span>
+                    </>
+                  ) : (
+                    <>
+                      <span style={{ fontSize: 28, fontWeight: 900, color: studentCoins > 5 ? C.coinGold : C.accent, fontFamily: "'DM Mono',monospace", transition: "color .3s" }}>{studentCoins}</span>
+                      <span className="jp" style={{ fontSize: 18, color: C.coinGold }}>先</span>
+                    </>
+                  )}
+                </div>
+                <div style={{ fontSize: 11, color: C.inkMuted }}>
+                  {userRole === "sensei" ? `+${activesensei?.coinsPerMin || 1} PLN/min` : `${activesensei.coinsPerMin} 先/min · ≈${studentCoins} min`}
+                </div>
               </div>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
                 <div style={{ fontSize: 10, color: "#888", letterSpacing: 1.5, textTransform: "uppercase" }}>Czas sesji</div>
@@ -1292,18 +1314,57 @@ export default function App() {
         {/* ─── SENSEI DASHBOARD ─── */}
         {page === "sensei-dashboard" && (
           <section className="fu" style={{ padding: "48px 40px", maxWidth: 1000, margin: "0 auto" }}>
-            {activeSessions.length > 0 && (
-              <div style={{ padding: 16, marginBottom: 20, borderRadius: 12, background: C.greenSoft, border: `1.5px solid ${C.green}40`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: C.green }}>🟢 Uczeń czeka na Ciebie!</div>
-                  <div style={{ fontSize: 12, color: C.inkMuted, marginTop: 2 }}>{activeSessions[0]?.student_id} · właśnie teraz</div>
-                </div>
-                <button className="bm" onClick={() => window.open('https://whereby.com/senseionline', '_blank')}>Dołącz do lekcji →</button>
+            <SectionTitle tag="👨‍🏫 Panel" tagColor={C.accent} tagBg={C.accentSoft} title="Panel" accent="Nauczyciela" />
+
+            {/* Запросы студентов */}
+            {activeRequests.length > 0 && (
+              <div style={{ marginBottom: 24 }}>
+                <h3 style={{ fontSize: 17, fontWeight: 700, color: C.ink, marginBottom: 12 }}>🟢 Uczniowie czekają na lekcję</h3>
+                {activeRequests.map((req) => (
+                  <div key={req.id} className="card" style={{ padding: "16px 20px", marginBottom: 10, display: "flex", justifyContent: "space-between", alignItems: "center", border: `1.5px solid ${C.green}30`, background: C.greenSoft }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                      <div style={{ width: 42, height: 42, borderRadius: 12, background: C.tealSoft, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: 700, color: C.teal }}>{req.avatar}</div>
+                      <div>
+                        <div style={{ fontSize: 15, fontWeight: 700, color: C.ink }}>{req.name}</div>
+                        <div style={{ fontSize: 12, color: C.inkMuted }}>{req.subject} · {req.time}</div>
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button className="bm" onClick={() => {
+                        setActivesensei({ name: req.name, subject: req.subject, ini: req.avatar, coinsPerMin: 1, roomUrl: 'https://whereby.com/senseionline' });
+                        setSessionSeconds(0);
+                        setSenseiEarnings(0);
+                        setSessionActive(true);
+                        setActiveRequests(prev => prev.filter(r => r.id !== req.id));
+                        nav("session");
+                        addToast(`Dołączono do lekcji z ${req.name}!`, "success", "🎥");
+                      }}>Dołącz →</button>
+                      <button className="bo" style={{ fontSize: 12, padding: "8px 16px" }} onClick={() => {
+                        setActiveRequests(prev => prev.filter(r => r.id !== req.id));
+                        addToast("Odrzucono prośbę", "success", "✓");
+                      }}>Odrzuć</button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
-            <SectionTitle tag="👨‍🏫 Panel" tagColor={C.accent} tagBg={C.accentSoft} title="Panel" accent="Nauczyciela" />
+
+            {activeRequests.length === 0 && (
+              <div className="card" style={{ padding: 24, marginBottom: 24, textAlign: "center", background: C.bgAlt }}>
+                <div style={{ fontSize: 32, marginBottom: 8 }}>⏳</div>
+                <div style={{ fontSize: 15, fontWeight: 600, color: C.ink }}>Brak aktywnych próśb</div>
+                <div style={{ fontSize: 13, color: C.inkMuted, marginTop: 4 }}>Uczniowie zobaczą Cię jako dostępnego i będą mogli się połączyć</div>
+              </div>
+            )}
+
+            {/* Статистика */}
             <div className="g4" style={{ marginBottom: 24 }}>
-              {[["💰","Zarobki (kwiecień)","1 240 PLN",C.greenSoft,C.green],["📅","Lekcje dzisiaj","3",C.tealSoft,C.teal],["⭐","Średnia ocena","4.9",C.coinBg,C.gold],["⏱️","Łączny czas","89h",C.accentSoft,C.accent]].map(([ic,l,v,bg,c],i) => (
+              {[
+                ["💰","Zarobki (kwiecień)","1 240 PLN",C.greenSoft,C.green],
+                ["📅","Lekcje dzisiaj","3",C.tealSoft,C.teal],
+                ["⭐","Średnia ocena","4.9",C.coinBg,C.gold],
+                ["⏱️","Łączny czas","89h",C.accentSoft,C.accent]
+              ].map(([ic,l,v,bg,c],i) => (
                 <div key={i} className="card" style={{ padding: 18, textAlign: "center", background: bg }}>
                   <div style={{ fontSize: 22, marginBottom: 4 }}>{ic}</div>
                   <div style={{ fontSize: 20, fontWeight: 800, color: c, fontFamily: "'DM Mono',monospace" }}>{v}</div>
@@ -1311,6 +1372,8 @@ export default function App() {
                 </div>
               ))}
             </div>
+
+            {/* Заработок за апрель */}
             <div className="card" style={{ padding: 24, marginBottom: 20 }}>
               <h3 style={{ fontSize: 17, fontWeight: 700, color: C.ink, marginBottom: 16 }}>Zarobki — kwiecień 2026</h3>
               {[["1–7 kwiecień","18 sesji","312 PLN"],["8–14 kwiecień","22 sesji","398 PLN"],["15 kwiecień–dziś","15 sesji","530 PLN"]].map(([p,s,e],i) => (
@@ -1324,21 +1387,17 @@ export default function App() {
                 <span style={{ fontSize: 20, fontWeight: 900, color: C.green, fontFamily: "'DM Mono',monospace" }}>1 240 PLN</span>
               </div>
             </div>
-            <div className="card" style={{ padding: 24, marginBottom: 16 }}>
-              <h3 style={{ fontSize: 17, fontWeight: 700, color: C.ink, marginBottom: 16 }}>📅 Dzisiaj</h3>
-              {[["14:00","Matematyka","Kasia M.","45 min",true],["16:30","Fizyka","Olek T.","30 min",false]].map(([t,s,st,d,now],i) => (
-                <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 14px", borderRadius: 10, marginBottom: 8, background: now ? C.greenSoft : C.bgAlt, border: `1px solid ${now ? C.green+"30" : C.borderLight}` }}>
-                  <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                    <span style={{ fontFamily: "'DM Mono',monospace", fontWeight: 700, fontSize: 14, color: C.ink }}>{t}</span>
-                    <div><div style={{ fontSize: 14, fontWeight: 600 }}>{s}</div><div style={{ fontSize: 12, color: C.inkMuted }}>{st} · {d}</div></div>
-                  </div>
-                  <button className={now ? "bm" : "bo"} style={{ padding: "7px 16px", fontSize: 12 }}>{now ? "Dołącz →" : "Szczegóły"}</button>
-                </div>
-              ))}
-            </div>
-            <div className="card" style={{ padding: 20, textAlign: "center", cursor: "pointer" }} onClick={() => nav("for-senseis")}>
-              <div style={{ fontSize: 24, marginBottom: 6 }}>📈</div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>Kalkulator zarobków</div>
+
+            {/* Статус онлайн */}
+            <div className="card" style={{ padding: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: C.ink }}>Status dostępności</div>
+                <div style={{ fontSize: 12, color: C.inkMuted, marginTop: 2 }}>Uczniowie widzą Cię jako dostępnego</div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ width: 10, height: 10, borderRadius: "50%", background: C.green, animation: "pulse 1.5s infinite" }} />
+                <span style={{ fontSize: 14, fontWeight: 600, color: C.green }}>Online</span>
+              </div>
             </div>
           </section>
         )}
