@@ -857,7 +857,7 @@ export default function App() {
               <p style={{ color: C.inkSoft, fontSize: 15, marginTop: 8, maxWidth: 440, margin: "8px auto 0" }}>
                 Zarejestruj się i zacznij uczyć się już dziś. Kup SenseiCoiny i płać tylko za minuty.
               </p>
-              <button className="bm" style={{ marginTop: 20, fontSize: 15, padding: "14px 36px" }} onClick={() => nav("register")}>Odbierz 5 darmowych 先 →</button>
+              <button className="bm" style={{ marginTop: 20, fontSize: 15, padding: "14px 36px" }} onClick={() => nav("register")}>Zarejestruj się za darmo →</button>
             </section>
           </div>
         )}
@@ -899,7 +899,9 @@ export default function App() {
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
                 <div style={{ fontSize: 10, color: "#888", letterSpacing: 1.5, textTransform: "uppercase" }}>Czas sesji</div>
                 <div style={{ fontSize: 28, fontWeight: 900, fontFamily: "'DM Mono',monospace", color: "#fff" }}>{formatTime(sessionSeconds)}</div>
-                <div style={{ fontSize: 11, color: C.accent, fontWeight: 600 }}>Wydano: {sessionCoinsSpent} 先</div>
+                <div style={{ fontSize: 11, color: userRole === "sensei" ? C.green : C.accent, fontWeight: 600 }}>
+                  {userRole === "sensei" ? `Zarobiono: ${senseiEarnings} PLN` : `Wydano: ${sessionCoinsSpent} 先`}
+                </div>
               </div>
             </div>
             <div style={{ flex: 1, display: "flex" }}>
@@ -943,11 +945,22 @@ export default function App() {
                 ))}
               </div>
               <div style={{ flex: 1, margin: "0 24px" }}>
-                <div style={{ fontSize: 10, color: "#888", textAlign: "center", marginBottom: 4 }}>Saldo coinów</div>
-                <div style={{ background: "#22223A", borderRadius: 8, height: 8, overflow: "hidden" }}>
-                  <div style={{ height: "100%", width: `${Math.min((studentCoins / 42) * 100, 100)}%`, background: studentCoins > 10 ? `linear-gradient(90deg,${C.coinGold},#E8A800)` : `linear-gradient(90deg,${C.accent},#FF4444)`, borderRadius: 8, transition: "width .5s" }} />
-                </div>
-                {studentCoins <= 5 && <div style={{ fontSize: 10, color: C.accent, textAlign: "center", marginTop: 4, fontWeight: 600 }}>⚠ Kończy się saldo!</div>}
+                {userRole === "sensei" ? (
+                  <>
+                    <div style={{ fontSize: 10, color: "#888", textAlign: "center", marginBottom: 4 }}>Zarobek sesji</div>
+                    <div style={{ background: "#22223A", borderRadius: 8, height: 8, overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${Math.min((senseiEarnings / 60) * 100, 100)}%`, background: `linear-gradient(90deg,${C.green},#00C853)`, borderRadius: 8, transition: "width .5s" }} />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div style={{ fontSize: 10, color: "#888", textAlign: "center", marginBottom: 4 }}>Saldo coinów</div>
+                    <div style={{ background: "#22223A", borderRadius: 8, height: 8, overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${Math.min((studentCoins / 42) * 100, 100)}%`, background: studentCoins > 10 ? `linear-gradient(90deg,${C.coinGold},#E8A800)` : `linear-gradient(90deg,${C.accent},#FF4444)`, borderRadius: 8, transition: "width .5s" }} />
+                    </div>
+                    {studentCoins <= 5 && <div style={{ fontSize: 10, color: C.accent, textAlign: "center", marginTop: 4, fontWeight: 600 }}>⚠ Kończy się saldo!</div>}
+                  </>
+                )}
               </div>
               <button onClick={endSession} style={{ padding: "12px 24px", borderRadius: 50, border: "none", background: C.accent, color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "inherit" }}>Zakończ lekcję</button>
             </div>
