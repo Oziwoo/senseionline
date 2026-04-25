@@ -381,6 +381,7 @@ export default function App() {
   const [toasts, setToasts] = useState([]);
   const [activeSessions, setActiveSessions] = useState([]);
   const [senseiEarnings, setSenseiEarnings] = useState(0);
+  const [senseiSubject, setSenseiSubject] = useState("");
   const [activeRequests, setActiveRequests] = useState([
     { id: 1, name: "Kasia M.", subject: "Matematyka", time: "teraz", avatar: "KM" },
     { id: 2, name: "Olek T.", subject: "Fizyka", time: "2 min temu", avatar: "OT" },
@@ -436,6 +437,7 @@ export default function App() {
       setStudentCoins(data.coins ?? 0);
       setStreak(data.streak ?? 0);
       if (data.role) setUserRole(data.role);
+      if (data.subject) setSenseiSubject(data.subject);
     }
   };
 
@@ -444,7 +446,7 @@ export default function App() {
     const { error } = await supabase.auth.signUp({
       email: authEmail,
       password: authPassword,
-      options: { data: { name: authName, role: authRole } },
+      options: { data: { name: authName, role: authRole, subject: senseiSubject } },
     });
     if (error) {
       addToast(error.message, "error", "❌");
@@ -574,7 +576,7 @@ export default function App() {
     { section: "Menu" },
     { icon: "🏠", label: "Strona główna", p: "home" },
     { icon: "👨‍🏫", label: "Panel Nauczyciela", p: "sensei-dashboard" },
-    { icon: "🎓", label: "Dla nauczycieli", p: "for-senseis" },
+    { icon: "🎓", label: "Moi uczniowie", p: "sensei-students" },
     { section: "Analiza" },
     { icon: "📊", label: "Matryca konkurentów", p: "competitors" },
     { icon: "📈", label: "Dla inwestorów", p: "investor" },
@@ -1415,6 +1417,66 @@ export default function App() {
           </section>
         )}
 
+        {/* ─── SENSEI STUDENTS ─── */}
+        {page === "sensei-students" && (
+          <section className="fu" style={{ padding: "48px 40px", maxWidth: 1000, margin: "0 auto" }}>
+            <SectionTitle tag="👨‍🎓 Uczniowie" tagColor={C.teal} tagBg={C.tealSoft}
+              title="Uczniowie szukający" accent="pomocy"
+              sub={senseiSubject ? `Uczniowie potrzebujący pomocy z: ${senseiSubject}` : "Wybierz przedmiot w ustawieniach profilu"} />
+
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 24 }}>
+              {["Wszystkie", "Matematyka","Fizyka","Chemia","Angielski","Niemiecki","Polski","Biologia","Informatyka"].map(s => (
+                <button key={s} className={`chip ${(s === "Wszystkie" ? !senseiSubject : senseiSubject === s) ? "on" : ""}`}
+                  onClick={() => setSenseiSubject(s === "Wszystkie" ? "" : s)}>
+                  {s}
+                </button>
+              ))}
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {[
+                { id: 1, name: "Kasia M.", subject: "Matematyka", level: "Matura", urgency: "teraz", avatar: "KM", desc: "Potrzebuję pomocy z całkami — egzamin jutro!" },
+                { id: 2, name: "Olek T.", subject: "Fizyka", level: "Liceum kl.2", urgency: "teraz", avatar: "OT", desc: "Nie rozumiem ruchu harmonicznego." },
+                { id: 3, name: "Zofia K.", subject: "Matematyka", level: "Matura", urgency: "za 1h", avatar: "ZK", desc: "Proszę o pomoc z geometrią analityczną." },
+                { id: 4, name: "Marek B.", subject: "Angielski", level: "B2", urgency: "teraz", avatar: "MB", desc: "Chcę poćwiczyć speaking przed rozmową kwalifikacyjną." },
+                { id: 5, name: "Ania W.", subject: "Chemia", level: "Liceum kl.3", urgency: "za 30min", avatar: "AW", desc: "Reakcje redoks — potrzebuję wytłumaczenia od podstaw." },
+              ].filter(s => !senseiSubject || s.subject === senseiSubject).map(student => (
+                <div key={student.id} className="card" style={{ padding: "18px 22px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, border: student.urgency === "teraz" ? `1.5px solid ${C.green}40` : `1px solid ${C.border}`, background: student.urgency === "teraz" ? C.greenSoft : C.bgCard }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 14, flex: 1 }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 12, background: C.tealSoft, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: C.teal, flexShrink: 0 }}>{student.avatar}</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                        <span style={{ fontSize: 15, fontWeight: 700, color: C.ink }}>{student.name}</span>
+                        <span style={{ fontSize: 11, background: C.bgAlt, border: `1px solid ${C.border}`, padding: "2px 8px", borderRadius: 20, color: C.inkMuted }}>{student.level}</span>
+                        <span style={{ fontSize: 11, fontWeight: 600, color: student.urgency === "teraz" ? C.green : C.gold }}>● {student.urgency}</span>
+                      </div>
+                      <div style={{ fontSize: 13, color: C.inkSoft }}>{student.subject} · {student.desc}</div>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                    <button className="bm" style={{ padding: "9px 18px", fontSize: 13 }} onClick={() => {
+                      setActivesensei({ name: student.name, subject: student.subject, ini: student.avatar, coinsPerMin: 1, roomUrl: "https://whereby.com/senseionline" });
+                      setSessionSeconds(0);
+                      setSenseiEarnings(0);
+                      setSessionActive(true);
+                      nav("session");
+                      addToast(`Rozpoczęto lekcję z ${student.name}!`, "success", "🎥");
+                    }}>Połącz →</button>
+                  </div>
+                </div>
+              ))}
+
+              {[{ subject: "Matematyka" },{ subject: "Fizyka" },{ subject: "Angielski" },{ subject: "Chemia" }].filter(s => !senseiSubject || s.subject === senseiSubject).length === 0 && senseiSubject && (
+                <div className="card" style={{ padding: 40, textAlign: "center", background: C.bgAlt }}>
+                  <div style={{ fontSize: 32, marginBottom: 8 }}>🎉</div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: C.ink }}>Brak oczekujących uczniów</div>
+                  <div style={{ fontSize: 13, color: C.inkMuted, marginTop: 4 }}>Wróć za chwilę — nowi uczniowie pojawiają się na bieżąco</div>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
         {/* ─── FOR SENSEIS ─── */}
         {page === "for-senseis" && (
           <section className="fu" style={{ padding: "48px 40px", maxWidth: 1000, margin: "0 auto" }}>
@@ -1462,6 +1524,19 @@ export default function App() {
                         </button>
                       ))}
                     </div>
+                    {page === "register" && authRole === "sensei" && (
+                      <div>
+                        <div style={{ fontSize: 12, color: C.inkMuted, marginBottom: 6 }}>Twój przedmiot:</div>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                          {["Matematyka","Fizyka","Chemia","Angielski","Niemiecki","Polski","Biologia","Informatyka","Historia","Geografia"].map(s => (
+                            <button key={s} type="button" onClick={() => setSenseiSubject(s)}
+                              style={{ padding: "6px 12px", borderRadius: 20, border: `1.5px solid ${senseiSubject === s ? C.accent : C.border}`, background: senseiSubject === s ? C.accentSoft : C.bgCard, color: senseiSubject === s ? C.accent : C.inkSoft, fontSize: 12, fontWeight: senseiSubject === s ? 700 : 400, cursor: "pointer", fontFamily: "inherit", transition: "all .2s" }}>
+                              {s}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </>
                 )}
                 <input type="email" placeholder="Adres e-mail" value={authEmail} onChange={e => setAuthEmail(e.target.value)} style={{ padding: "12px 14px", borderRadius: 10, border: `1.5px solid ${C.border}`, background: C.bgCard, fontSize: 14, fontFamily: "inherit", color: C.ink, outline: "none" }} />
