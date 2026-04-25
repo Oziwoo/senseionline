@@ -855,23 +855,18 @@ export default function App() {
               </div>
             </div>
             <div style={{ flex: 1, display: "flex" }}>
-              <div style={{ flex: 1, background: "#0A0A18", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-                <div style={{ textAlign: "center" }}>
-                  <div style={{ width: 120, height: 120, borderRadius: "50%", background: `linear-gradient(135deg,${C.accentSoft},${C.goldSoft})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 48, fontWeight: 800, color: C.accent, margin: "0 auto 16px", border: `3px solid ${C.accent}40` }}>{activesensei.ini}</div>
-                  <div style={{ color: "#fff", fontSize: 18, fontWeight: 600 }}>{activesensei.name}</div>
-                  <div style={{ color: "#888", fontSize: 13, marginTop: 4 }}>{activesensei.subject}</div>
-                  <div style={{ marginTop: 16, display: "flex", justifyContent: "center", gap: 6 }}>
-                    {[0.8, 1.0, 1.2].map((d, i) => <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: C.green, animation: `pulse ${d}s infinite` }} />)}
-                  </div>
-                </div>
-                <div style={{ position: "absolute", bottom: 20, right: 20, width: 140, height: 100, background: "#22223A", borderRadius: 10, border: "2px solid #3A3A5A", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <div style={{ textAlign: "center" }}><div style={{ fontSize: 28 }}>👤</div><div style={{ fontSize: 10, color: "#888" }}>Ty</div></div>
-                </div>
-                {sessionSeconds % 6 === 0 && sessionSeconds > 0 && (
-                  <div style={{ position: "absolute", top: "40%", left: "50%", transform: "translate(-50%,-50%)", fontSize: 22, color: C.coinGold, fontWeight: 900, fontFamily: "'DM Mono',monospace", animation: "fu .5s ease-out both", pointerEvents: "none", background: "rgba(0,0,0,.6)", padding: "6px 14px", borderRadius: 20 }}>
-                    −{activesensei.coinsPerMin} 先
-                  </div>
-                )}
+              <div style={{ flex: 1, position: "relative", background: "#0A0A18" }}>
+                <iframe
+                  src="https://whereby.com/senseionline"
+                  allow="camera; microphone; fullscreen; speaker; display-capture"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    border: "none",
+                    position: "absolute",
+                    top: 0, left: 0, right: 0, bottom: 0
+                  }}
+                />
               </div>
               <div style={{ width: 320, background: "#F8F8F5", display: "flex", flexDirection: "column", borderLeft: "1px solid #2A2A42" }}>
                 <div style={{ padding: "12px 16px", borderBottom: "1px solid #E5E2DA", fontSize: 12, fontWeight: 600, color: C.inkSoft, background: "#fff" }}>📋 Tablica interaktywna</div>
