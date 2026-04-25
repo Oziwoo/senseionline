@@ -576,7 +576,7 @@ export default function App() {
     { section: "Menu" },
     { icon: "🏠", label: "Strona główna", p: "home" },
     { icon: "👨‍🏫", label: "Panel Nauczyciela", p: "sensei-dashboard" },
-    { icon: "🎓", label: "Moi uczniowie", p: "sensei-students" },
+    { icon: "👨‍🎓", label: "Moi uczniowie", p: "sensei-students" },
     { section: "Analiza" },
     { icon: "📊", label: "Matryca konkurentów", p: "competitors" },
     { icon: "📈", label: "Dla inwestorów", p: "investor" },
@@ -593,7 +593,7 @@ export default function App() {
     { icon: "📈", label: "Dla inwestorów", p: "investor" },
   ];
 
-  const MENU = !user ? MENU_PUBLIC : userRole === "sensei" ? MENU_SENSEI : MENU_STUDENT;
+  const MENU = userRole === "sensei" ? MENU_SENSEI : !user ? MENU_PUBLIC : MENU_STUDENT;
 
   const ft = senseiS.filter(t => (!sf || t.subject === sf) && (!sq || (t.name + t.subject).toLowerCase().includes(sq.toLowerCase())));
 
