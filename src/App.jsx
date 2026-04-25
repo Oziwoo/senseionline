@@ -379,6 +379,7 @@ export default function App() {
   const [streak, setStreak] = useState(7);
   const [streakBonusClaimed, setStreakBonusClaimed] = useState(false);
   const [toasts, setToasts] = useState([]);
+  const [activeSessions, setActiveSessions] = useState([]);
   const [activeChild, setActiveChild] = useState("Kasia");
   const [smsNotify, setSmsNotify] = useState(true);
   const [authRequired, setAuthRequired] = useState(false);
@@ -404,7 +405,24 @@ export default function App() {
       setUser(session?.user ?? null);
       if (session?.user) loadProfile(session.user.id);
     });
-    return () => subscription.unsubscribe();
+    const sessionSub = supabase
+      .channel('sessions')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'sessions'
+      }, (payload) => {
+        setActiveSessions(prev => [...prev, payload.new]);
+        if (userRole === 'sensei') {
+          addToast("Uczeń czeka na lekcję!", "success", "🟢");
+        }
+      })
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+      sessionSub.unsubscribe();
+    };
   }, []);
 
   const loadProfile = async (userId) => {
@@ -465,19 +483,27 @@ export default function App() {
     setConnectingsensei(sensei);
   };
 
-  const onConnected = () => {
-  setActivesensei({
-    ...connectingsensei,
-    roomUrl: "https://whereby.com/senseionline"
-  });
-  setConnectingsensei(null);
-  setSessionSeconds(0);
-  setSessionCoinsSpent(0);
-  setSessionRating(0);
-  setSessionActive(true);
-  nav("session");
-  addToast(`Połączono z ${connectingsensei?.name}!`, "success", "🎥");
-};
+  const onConnected = async () => {
+    if (user) {
+      await supabase.from('sessions').insert({
+        student_id: user.id,
+        sensei_name: connectingsensei?.name,
+        room_url: 'https://whereby.com/senseionline',
+        status: 'active'
+      });
+    }
+    setActivesensei({
+      ...connectingsensei,
+      roomUrl: 'https://whereby.com/senseionline'
+    });
+    setConnectingsensei(null);
+    setSessionSeconds(0);
+    setSessionCoinsSpent(0);
+    setSessionRating(0);
+    setSessionActive(true);
+    nav("session");
+    addToast(`Połączono z ${connectingsensei?.name}!`, "success", "🎥");
+  };
 
  const buyCoins = async (pack) => {
   const newBalance = studentCoins + pack.coins;
@@ -1266,6 +1292,15 @@ export default function App() {
         {/* ─── SENSEI DASHBOARD ─── */}
         {page === "sensei-dashboard" && (
           <section className="fu" style={{ padding: "48px 40px", maxWidth: 1000, margin: "0 auto" }}>
+            {activeSessions.length > 0 && (
+              <div style={{ padding: 16, marginBottom: 20, borderRadius: 12, background: C.greenSoft, border: `1.5px solid ${C.green}40`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: C.green }}>🟢 Uczeń czeka na Ciebie!</div>
+                  <div style={{ fontSize: 12, color: C.inkMuted, marginTop: 2 }}>{activeSessions[0]?.student_id} · właśnie teraz</div>
+                </div>
+                <button className="bm" onClick={() => window.open('https://whereby.com/senseionline', '_blank')}>Dołącz do lekcji →</button>
+              </div>
+            )}
             <SectionTitle tag="👨‍🏫 Panel" tagColor={C.accent} tagBg={C.accentSoft} title="Panel" accent="Nauczyciela" />
             <div className="g4" style={{ marginBottom: 24 }}>
               {[["💰","Zarobki (kwiecień)","1 240 PLN",C.greenSoft,C.green],["📅","Lekcje dzisiaj","3",C.tealSoft,C.teal],["⭐","Średnia ocena","4.9",C.coinBg,C.gold],["⏱️","Łączny czas","89h",C.accentSoft,C.accent]].map(([ic,l,v,bg,c],i) => (
